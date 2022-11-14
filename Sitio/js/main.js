@@ -75,11 +75,15 @@
   }
 
   // Header scroll class
-  $(window).scroll(function() {
+  $(window).scroll(function () {
     if ($(this).scrollTop() > 100) {
-      $('#header').addClass('header-scrolled');
+      $("#header").addClass("header-scrolled");
+      $("#logo").addClass("logoInicio");
+      $("#cajalogo").addClass("cajalogochica");
     } else {
-      $('#header').removeClass('header-scrolled');
+      $("#header").removeClass("header-scrolled");
+      $("#logo").removeClass("logoInicio");
+      $("#cajalogo").removeClass("cajalogochica");
     }
   });
 
