@@ -164,7 +164,7 @@ h6 {
 }
 
 #cajalogo {
-  background-color: #000000a1;
+  /* background-color: #000000a1; */
   width: 380px;
   height: 290px;
   border-radius: 15px;
@@ -182,16 +182,16 @@ h6 {
 }
 
 #logo {
-  content: url("../img/logo.png");
+  content: url("../img/logosolo.png");
   float: left;
-  width: 320px;
+  width: 170px;
   transition: all 0.5s;
   position: absolute;
 }
 
 #logo.logoInicio {
   content: url("../img/logosolo.png");
-  width: 122px;
+  width: 120px;
   transition: all 0.5s;
 }
 
@@ -1562,6 +1562,7 @@ body.mobile-nav-active #mobile-nav-toggle {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
   }
+  
 }
 
 @media (min-width: 992px) {
@@ -1593,6 +1594,11 @@ body.mobile-nav-active #mobile-nav-toggle {
 @media (max-width: 768px) {
   .back-to-top {
     bottom: 15px;
+  }
+  #logo.logoInicio {
+    content: url("../img/logosolo.png");
+    width: 45px;
+    transition: all 0.5s;
   }
 
   #header #logo h1 {
