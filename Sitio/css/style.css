@@ -1032,8 +1032,9 @@ body.mobile-nav-active #mobile-nav-toggle {
 }
 
 #portfolio .portfolio-item figure .link-preview {
-  left: calc(50% - 38px);
-  top: calc(50% - 18px);
+  /* TODO Cambiar a left 58 si queremos los dos botones */
+  left: calc(50% - 18px);
+  top: calc(50% - 38px);
 }
 
 #portfolio .portfolio-item figure .link-details {
@@ -1043,7 +1044,8 @@ body.mobile-nav-active #mobile-nav-toggle {
 
 #portfolio .portfolio-item figure:hover .link-preview {
   opacity: 1;
-  left: calc(50% - 44px);
+  /* left: calc(50% - 44px); */
+  top: calc(50% - 18px);
 }
 
 #portfolio .portfolio-item figure:hover .link-details {
