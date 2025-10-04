@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta content="" name="keywords" />
-    <meta content="" name="description" />
+    <meta content="marmol, granito, construccion, terrazo, monumentos funerarios, profesionales construccion, pisos marmol" name="keywords" />
+    <meta content="Marmolería Juárez - Especialistas en mármol, granito y terrazo para profesionales de la construcción. Más de 50 años de experiencia. Arte funerario, pisos y acabados de calidad." name="description" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png" />
@@ -15,7 +15,7 @@
     <title>Marmolería Juárez</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i|Montserrat:300,400,500,700" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <!-- Bootstrap CSS File -->
     <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
@@ -32,109 +32,117 @@
 
   <body>
     <header id="header">
-      <div class="container-fluid">
-        <div id="cajalogo" class="pull-left">
-          <!-- <h1><a href="#intro" class="scrollto">Marmolería Juárez</a></h1> -->
-          <a href="#intro"><img id="logo" alt="logo1" /></a>
+      <!-- Top bar estilo Floor & Decor -->
+      <div class="header-top">
+        <div class="container-fluid">
+          <div class="contact-info">
+            <span><i class="fa fa-phone"></i> (555) 123-4567</span>
+            <span><i class="fa fa-envelope"></i> info@marmoleriajuarez.com</span>
+            <span><i class="fa fa-clock-o"></i> Lun-Vie: 8:00-18:00 | Sáb: 8:00-14:00</span>
+          </div>
+          <div class="social-links">
+            <a href="#" title="Facebook"><i class="fa fa-facebook"></i></a>
+            <a href="#" title="Instagram"><i class="fa fa-instagram"></i></a>
+            <a href="#" title="WhatsApp"><i class="fa fa-whatsapp"></i></a>
+          </div>
         </div>
+      </div>
+      
+      <!-- Main header -->
+      <div class="header-main">
+        <div class="container-fluid">
+          <div id="cajalogo">
+            <a href="#intro"><img id="logo" src="img/logosolo.png" alt="Marmolería Juárez Logo" /></a>
+            <div class="logo-text">
+              <h1>Marmolería Juárez</h1>
+              <span class="tagline">50+ Años de Experiencia</span>
+            </div>
+          </div>
 
-        <nav id="nav-menu-container">
-          <ul class="nav-menu">
-            <li class="menu-active"><a href="#intro">Home</a></li>
-            <li><a href="#about">Nosotros</a></li>
-            <li><a href="#services">Servicios</a></li>
-            <li><a href="#portfolio">Galeria</a></li>
-            <li><a href="#team">Equipo</a></li>
-            <li><a href="#contact">Contacto</a></li>
-          </ul>
-        </nav>
-        <!-- #nav-menu-container -->
+          <nav id="nav-menu-container">
+            <ul class="nav-menu">
+              <li class="menu-active"><a href="#intro">Inicio</a></li>
+              <li><a href="#about">Nosotros</a></li>
+              <li><a href="#services">Servicios</a></li>
+              <li><a href="#portfolio">Galería</a></li>
+              <li><a href="#contact">Contacto</a></li>
+            </ul>
+            
+            <div class="header-cta">
+              <a href="#contact" class="btn btn-primary">Cotización Gratis</a>
+            </div>
+            
+            <!-- Mobile menu toggle -->
+            <button class="mobile-nav-toggle" type="button">
+              <i class="fa fa-bars"></i>
+            </button>
+          </nav>
+        </div>
       </div>
     </header>
     <!-- #header -->
 
     <!--==========================
-    Intro Section
-  ============================-->
+    Hero Section - Estilo Floor & Decor
+    ============================-->
     <section id="intro">
       <div class="intro-container">
-        <div id="introCarousel" class="carousel slide carousel-fade" data-ride="carousel">
-          <ol class="carousel-indicators"></ol>
-
-          <div class="carousel-inner" role="listbox">
-            <div class="carousel-item active">
-              <div class="carousel-background"><img src="img/intro-carousel/11.jpeg" alt="" /></div>
-              <div class="carousel-container">
-                <div class="carousel-content">
-                  <h2>Marmolería Juárez</h2>
-                  <p>Somos una empresa con mas de 50 años de experiencia en la elaboración de productos hechos con mármol</p>
-                  <a href="#featured-services" class="btn-get-started scrollto">Get Started</a>
+        <div class="container-fluid">
+          <div class="hero-content">
+            <!-- Hero Text Content -->
+            <div class="hero-text">
+              <span class="badge">50+ Años de Experiencia</span>
+              <h1>Especialistas en <span class="highlight">Mármol</span> y <span class="highlight">Granito</span></h1>
+              <p>
+                Transformamos espacios con materiales de primera calidad. Desde proyectos residenciales hasta grandes obras comerciales, 
+                ofrecemos soluciones integrales para profesionales de la construcción y arquitectura.
+              </p>
+              
+              <div class="hero-actions">
+                <a href="#portfolio" class="btn btn-primary">Ver Galería</a>
+                <a href="#contact" class="btn btn-secondary">Cotización Gratis</a>
+              </div>
+              
+              <div class="hero-stats">
+                <div class="stat-item">
+                  <span class="number">50+</span>
+                  <span class="label">Años Experiencia</span>
+                </div>
+                <div class="stat-item">
+                  <span class="number">1000+</span>
+                  <span class="label">Proyectos</span>
+                </div>
+                <div class="stat-item">
+                  <span class="number">100%</span>
+                  <span class="label">Satisfacción</span>
                 </div>
               </div>
             </div>
-
-            <div class="carousel-item">
-              <div class="carousel-background"><img src="img/intro-carousel/22.jpeg" alt="" /></div>
-              <div class="carousel-container">
-                <div class="carousel-content">
-                  <h2>Cruces</h2>
-                  <p>
-                    Grabamos el nombre del ser querido, su fecha de nacimiento y fecha de fallecimiento, epitafio, todo este cariño plasmado en cruces para panteón las cuales hay de diversos materiales como el hierro, madera, mármol y granito.
-                  </p>
-                  <a href="#featured-services" class="btn-get-started scrollto">Get Started</a>
-                </div>
+            
+            <!-- Hero Visual -->
+            <div class="hero-visual">
+              <div class="hero-image-container">
+                <img src="img/intro-carousel/11.jpeg" alt="Marmolería Juárez - Trabajo en mármol" />
               </div>
-            </div>
-
-            <div class="carousel-item">
-              <div class="carousel-background"><img src="img/intro-carousel/33.jpeg" alt="" /></div>
-              <div class="carousel-container">
-                <div class="carousel-content">
-                  <h2>Floreros Funerarios</h2>
-                  <p>En Marmolería Juárez contamos con todo tipo de floreros de mármol y granito que podrás elegir teniendo en cuenta tus gustos personales</p>
-                  <a href="#featured-services" class="btn-get-started scrollto">Get Started</a>
+              
+              <!-- Floating cards estilo Floor & Decor -->
+              <div class="floating-card floating-card-1">
+                <div class="icon">
+                  <i class="fa fa-shield"></i>
                 </div>
+                <h4>Garantía de Calidad</h4>
+                <p>Todos nuestros trabajos incluyen garantía completa de materiales y mano de obra.</p>
               </div>
-            </div>
-
-            <div class="carousel-item">
-              <div class="carousel-background"><img src="img/intro-carousel/44.jpeg" alt="" /></div>
-              <div class="carousel-container">
-                <div class="carousel-content">
-                  <h2>Monumentos para panteón</h2>
-                  <p>
-                    En Marmolería Juárez nos preocupamos por la calidad de los materiales con los que creamos nuestros monumentos para sus seres queridos. Sabemos que, al tratarse de un elemento de gran volumen, va a lucir llamativo y bonito, por lo que
-                    ofrecemos resistencia, belleza y durabilidad.
-                  </p>
-                  <a href="#featured-services" class="btn-get-started scrollto">Get Started</a>
+              
+              <div class="floating-card floating-card-2">
+                <div class="icon">
+                  <i class="fa fa-truck"></i>
                 </div>
-              </div>
-            </div>
-
-            <div class="carousel-item">
-              <div class="carousel-background"><img src="img/intro-carousel/5.png" alt="" /></div>
-              <div class="carousel-container">
-                <div class="carousel-content">
-                  <h2>Construcción y Remodelaciones</h2> 
-                  <p>
-                    Adecuaciones de espacios, mejoras de distribución, mejoras en espacios con poca luz, cálculos estructurales y mejoras estructurales. -Experiencia de más de 15 años, materiales de alta calidad, mano de obra con calidad tecnica,
-                    diseño y adecuación estructurada. -Resolvemos problemas y damos soluciones en espacios existentes. -Remodelaciones.
-                  </p>
-                  <a href="#featured-services" class="btn-get-started scrollto">Get Started</a>
-                </div>
+                <h4>Entrega e Instalación</h4>
+                <p>Servicio completo desde el diseño hasta la instalación final en su proyecto.</p>
               </div>
             </div>
           </div>
-
-          <a class="carousel-control-prev" href="#introCarousel" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon ion-chevron-left" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-          </a>
-
-          <a class="carousel-control-next" href="#introCarousel" role="button" data-slide="next">
-            <span class="carousel-control-next-icon ion-chevron-right" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-          </a>
         </div>
       </div>
     </section>
@@ -142,77 +150,161 @@
 
     <main id="main">
       <!--==========================
-      Featured Services Section
-    ============================-->
+      Featured Services Section - Estilo Floor & Decor
+      ============================-->
       <section id="featured-services">
-        <div class="container">
-          <div class="row">
-            <div class="col-lg-4 box">
-              <h4 class="title"><a href="">Remodelaciones</a></h4>
-              <p class="description">Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-            </div>
+        <!-- Banner superior -->
+        <div class="services-banner">
+          <div class="container-fluid">
+            <h2>Soluciones Profesionales</h2>
+            <p>Más de 50 años transformando espacios con mármol y granito de calidad premium</p>
+          </div>
+        </div>
+        
+        <!-- Grid de servicios -->
+        <div class="services-grid">
+          <div class="container-fluid">
+            <div class="services-row">
+              <div class="service-card">
+                <div class="service-icon">
+                  <i class="fa fa-wrench"></i>
+                </div>
+                <h4>Remodelaciones Integrales</h4>
+                <p>Transformamos espacios completos con materiales premium. Desde pisos de mármol hasta acabados en granito para proyectos residenciales y comerciales.</p>
+              </div>
 
-            <div class="col-lg-4 box box-bg">
-              <h4 class="title"><a href="">Cotizaciones</a></h4>
-              <p class="description">Minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat tarad limino ata</p>
-            </div>
+              <div class="service-card">
+                <div class="service-icon">
+                  <i class="fa fa-calculator"></i>
+                </div>
+                <h4>Cotizaciones Express</h4>
+                <p>Presupuestos detallados en 24 horas. Asesoría técnica especializada para profesionales de la construcción y arquitectura sin compromiso.</p>
+              </div>
 
-            <div class="col-lg-4 box">
-              <h4 class="title"><a href="">Arquitectura</a></h4>
-              <p class="description">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</p>
+              <div class="service-card">
+                <div class="service-icon">
+                  <i class="fa fa-building"></i>
+                </div>
+                <h4>Proyectos Arquitectónicos</h4>
+                <p>Colaboramos con arquitectos e ingenieros en proyectos comerciales y residenciales, garantizando calidad y cumplimiento de plazos establecidos.</p>
+              </div>
             </div>
+          </div>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="services-cta">
+          <div class="container-fluid">
+            <h3>¿Listo para tu próximo proyecto?</h3>
+            <p>Obtén una cotización gratuita y descubre por qué somos la elección de profesionales</p>
+            <a href="#contact" class="btn">Solicitar Cotización</a>
           </div>
         </div>
       </section>
       <!-- #featured-services -->
 
       <!--==========================
-      About Us Section
-    ============================-->
+      About Us Section - Estilo Floor & Decor
+      ============================-->
       <section id="about">
-        <div class="container">
-          <header class="section-header">
-            <h3>Nosotros</h3>
-            <p>
-              Brindamos productos y un servicio de gran calidad que nos permita proyectarnos como los mejores distribuidores de mármol a nivel global. Estamos capacitados para realizar desde pequeños proyectos hasta grandes obras de forma integral
-              (suministro y colocación) con medidas especiales para muebles o escaleras de mármol, barras de granito para cocina, cantera para fachadas, pisos y acabados. Revisa nuestros simuladores y proyecta tu idea.
-            </p>
-          </header>
-
-          <div class="row about-cols">
-            <div class="col-md-4 wow fadeInUp">
-              <div class="about-col">
-                <div class="img">
-                  <img src="img/about-mission.jpg" alt="" class="img-fluid" />
-                  <div class="icon"><i class="ion-ios-speedometer-outline"></i></div>
+        <div class="container-fluid">
+          <div class="about-container">
+            <!-- About Content -->
+            <div class="about-content">
+              <span class="section-badge">Nuestra Historia</span>
+              <h2>Más de <span class="highlight">50 años</span> construyendo con excelencia</h2>
+              <p class="lead">
+                Somos líderes en la distribución y transformación de mármol, granito y terrazo. Con más de cinco décadas de experiencia, brindamos soluciones integrales para profesionales de la construcción.
+              </p>
+              
+              <div class="about-features">
+                <div class="feature-item">
+                  <div class="icon">
+                    <i class="fa fa-award"></i>
+                  </div>
+                  <div class="text">
+                    <h4>Calidad Garantizada</h4>
+                    <p>Todos nuestros materiales cuentan con certificaciones internacionales de calidad.</p>
+                  </div>
                 </div>
-                <h2 class="title"><a href="#">Misión</a></h2>
+                
+                <div class="feature-item">
+                  <div class="icon">
+                    <i class="fa fa-users"></i>
+                  </div>
+                  <div class="text">
+                    <h4>Equipo Especializado</h4>
+                    <p>Técnicos expertos con décadas de experiencia en la industria del mármol.</p>
+                  </div>
+                </div>
+                
+                <div class="feature-item">
+                  <div class="icon">
+                    <i class="fa fa-truck"></i>
+                  </div>
+                  <div class="text">
+                    <h4>Servicio Integral</h4>
+                    <p>Desde el diseño hasta la instalación, manejamos todo el proceso.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="about-cta">
+                <a href="#services" class="btn btn-primary">Nuestros Servicios</a>
+                <a href="#contact" class="btn btn-secondary">Contáctanos</a>
+              </div>
+            </div>
+            
+            <!-- About Visual -->
+            <div class="about-visual">
+              <div class="about-image-grid">
+                <img src="img/about-mission.jpg" alt="Misión Marmolería Juárez" class="main-image" />
+                <img src="img/about-plan.jpg" alt="Planificación de proyectos" />
+                <img src="img/about-vision.jpg" alt="Visión empresarial" />
+              </div>
+              
+              <div class="experience-badge">
+                <span class="number">50+</span>
+                <span class="text">Años de Experiencia</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mission, Vision, Values Cards -->
+          <div class="about-cards">
+            <div class="about-card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fa fa-bullseye"></i>
+                </div>
+                <h3>Misión</h3>
+              </div>
+              <div class="card-content">
                 <p>Proveemos soluciones creativas de mármol y granito, de manera puntual y profesional, con el servicio que nos respalda desde 1965, adecuándonos a las necesidades y expectativas de los clientes.</p>
               </div>
             </div>
 
-            <div class="col-md-4 wow fadeInUp" data-wow-delay="0.1s">
-              <div class="about-col">
-                <div class="img">
-                  <img src="img/about-plan.jpg" alt="" class="img-fluid" />
-                  <div class="icon"><i class="ion-ios-list-outline"></i></div>
+            <div class="about-card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fa fa-eye"></i>
                 </div>
-                <h2 class="title"><a href="#">Visión</a></h2>
-                <p>Transformamos, instalamos y comercializamos mármol y granito en la producción de decoración y arte funerario, buscando ser líderes de nuestro ramo.</p>
+                <h3>Visión</h3>
+              </div>
+              <div class="card-content">
+                <p>Transformamos, instalamos y comercializamos mármol y granito en la producción de decoración y arte funerario, buscando ser líderes de nuestro ramo a nivel nacional.</p>
               </div>
             </div>
 
-            <div class="col-md-4 wow fadeInUp" data-wow-delay="0.2s">
-              <div class="about-col">
-                <div class="img">
-                  <img src="img/about-vision.jpg" alt="" class="img-fluid" />
-                  <div class="icon"><i class="ion-ios-eye-outline"></i></div>
+            <div class="about-card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fa fa-heart"></i>
                 </div>
-                <h2 class="title"><a href="#">Valores</a></h2>
-                <p>
-                  Honestidad: Actuamos correctamente, manejando los recursos que se nos han encomendado, manifestando con claridad nuestras creencias y respetando las leyes de nuestra comunidad. Que es el resultado de la calidad, la responsabilidad y
-                  la honestidad con que trabajamos, brindando a nuestros clientes la convicción de que nuestros productos y servicios están a la altura de sus expectativas.
-                </p>
+                <h3>Valores</h3>
+              </div>
+              <div class="card-content">
+                <p>Honestidad, calidad y responsabilidad son los pilares de nuestro trabajo. Manejamos los recursos con transparencia y respetamos las leyes de nuestra comunidad, brindando confianza absoluta.</p>
               </div>
             </div>
           </div>
@@ -226,40 +318,40 @@
       <section id="services">
         <div class="container">
           <header class="section-header wow fadeInUp">
-            <h3>Servicios</h3>
-            <p>Grabamos cruces, las llevamos a domicilio, instalación de monumentos, etc.</p>
+            <h3 class="section-title">Servicios Especializados</h3>
+            <p>Ofrecemos servicios integrales para profesionales de la construcción y oficios especializados</p>
           </header>
 
           <div class="row">
             <div class="col-lg-4 col-md-6 box wow bounceInUp" data-wow-duration="1.4s">
-              <div class="icon"><i class="ion-ios-analytics-outline"></i></div>
-              <h4 class="title"><a href="">Lorem Ipsum</a></h4>
-              <p class="description">Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
+              <div class="icon"><i class="fa fa-truck"></i></div>
+              <h4 class="title"><a href="">Entrega e Instalación</a></h4>
+              <p class="description">Servicio de entrega a domicilio y instalación profesional de monumentos, pisos y acabados con garantía de calidad.</p>
             </div>
             <div class="col-lg-4 col-md-6 box wow bounceInUp" data-wow-duration="1.4s">
-              <div class="icon"><i class="ion-ios-bookmarks-outline"></i></div>
-              <h4 class="title"><a href="">Dolor Sitema</a></h4>
-              <p class="description">Minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat tarad limino ata</p>
+              <div class="icon"><i class="fa fa-edit"></i></div>
+              <h4 class="title"><a href="">Grabado Personalizado</a></h4>
+              <p class="description">Servicio especializado de grabado en mármol y granito. Letras, fechas, epitafios y diseños personalizados con tecnología de precisión.</p>
             </div>
             <div class="col-lg-4 col-md-6 box wow bounceInUp" data-wow-duration="1.4s">
-              <div class="icon"><i class="ion-ios-paper-outline"></i></div>
-              <h4 class="title"><a href="">Sed ut perspiciatis</a></h4>
-              <p class="description">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</p>
+              <div class="icon"><i class="fa fa-cube"></i></div>
+              <h4 class="title"><a href="">Terrazo Premium</a></h4>
+              <p class="description">Pisos de terrazo de alta resistencia para uso comercial e industrial. Ideales para espacios de alto tráfico y ambientes exigentes.</p>
             </div>
             <div class="col-lg-4 col-md-6 box wow bounceInUp" data-wow-delay="0.1s" data-wow-duration="1.4s">
-              <div class="icon"><i class="ion-ios-speedometer-outline"></i></div>
-              <h4 class="title"><a href="">Magni Dolores</a></h4>
-              <p class="description">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+              <div class="icon"><i class="fa fa-home"></i></div>
+              <h4 class="title"><a href="">Arquitectura Funeraria</a></h4>
+              <p class="description">Diseño y construcción de mausoleos, capillas y monumentos arquitectónicos. Proyectos únicos con materiales de primera calidad.</p>
             </div>
             <div class="col-lg-4 col-md-6 box wow bounceInUp" data-wow-delay="0.1s" data-wow-duration="1.4s">
-              <div class="icon"><i class="ion-ios-barcode-outline"></i></div>
-              <h4 class="title"><a href="">Nemo Enim</a></h4>
-              <p class="description">At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque</p>
+              <div class="icon"><i class="fa fa-cogs"></i></div>
+              <h4 class="title"><a href="">Mantenimiento y Restauración</a></h4>
+              <p class="description">Servicios de pulido, sellado y restauración de superficies de mármol y granito. Mantenemos sus inversiones como nuevas.</p>
             </div>
             <div class="col-lg-4 col-md-6 box wow bounceInUp" data-wow-delay="0.1s" data-wow-duration="1.4s">
-              <div class="icon"><i class="ion-ios-people-outline"></i></div>
-              <h4 class="title"><a href="">Eiusmod Tempor</a></h4>
-              <p class="description">Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi</p>
+              <div class="icon"><i class="fa fa-users"></i></div>
+              <h4 class="title"><a href="">Asesoría Técnica</a></h4>
+              <p class="description">Consultoría especializada para arquitectos, constructores y diseñadores. Asesoramos en selección de materiales y técnicas de instalación.</p>
             </div>
           </div>
         </div>
@@ -279,66 +371,141 @@
       <!-- #call-to-action -->
 
     <!--==========================
-      Portfolio Section
+      Portfolio/Gallery Section - Estilo Floor & Decor
     ============================-->
-      <section id="portfolio" class="section-bg">
-        <div class="container">
-          <header class="section-header">
-            <h3 class="section-title">Galeria</h3>
-          </header>
-
-          <div class="row">
-            <div class="col-lg-12">
-              <ul id="portfolio-flters">
-                <li data-filter="*" class="filter-active">Todos</li>
-                <li data-filter=".filter-cruces">Cruces</li>
-                <li data-filter=".filter-florero">Floreros</li>
-                <li data-filter=".filter-monumento">Monumentos</li>
-              </ul>
-            </div>
+      <section id="portfolio">
+        <div class="container-fluid">
+          <!-- Portfolio Header -->
+          <div class="portfolio-header">
+            <span class="section-badge">Nuestros Trabajos</span>
+            <h2>Galería de Proyectos</h2>
+            <p>Descubre la calidad y artesanía de nuestros trabajos en mármol, granito y terrazo realizados para profesionales de la construcción</p>
           </div>
 
-          <div class="row portfolio-container">
+          <!-- Portfolio Filters -->
+          <ul id="portfolio-flters">
+            <li data-filter="*" class="filter-active">Todos</li>
+            <li data-filter=".filter-cruces">Cruces</li>
+            <li data-filter=".filter-florero">Floreros</li>
+            <li data-filter=".filter-monumento">Monumentos</li>
+            <li data-filter=".filter-terrazo">Terrazo</li>
+          </ul>
 
-            <div class="col-lg-4 col-md-6 portfolio-item filter-cruces wow fadeInUp">
+          <!-- Portfolio Grid -->
+          <div class="portfolio-container">
+            <!-- Cruces -->
+            <div class="portfolio-item filter-cruces">
               <div class="portfolio-wrap">
                 <figure>
-                  <img src="img/portfolio/cruces/1.jpeg" class="img-fluid" alt="" />
-                  <a href="img/portfolio/cruces/1.jpeg" data-lightbox="portfolio" data-title="Cruz de Marmol" class="link-preview" title="Preview"><i class="ion ion-eye"></i></a>
+                  <img src="img/portfolio/cruces/1.jpeg" alt="Cruz de Mármol Premium" />
+                  <div class="portfolio-category">Cruces</div>
+                  <div class="portfolio-overlay">
+                    <a href="img/portfolio/cruces/1.jpeg" class="btn-preview" data-lightbox="portfolio" data-title="Cruz de Mármol Premium">
+                      <i class="fa fa-eye"></i> Ver Detalle
+                    </a>
+                  </div>
                 </figure>
-                <div class="portfolio-info">
-                  <h4><a href="#">Cruz de Marmol</a></h4>
-                  <p>Cruz de Marmol</p>
-                </div>
+              </div>
+              <div class="portfolio-info">
+                <h4><a href="#">Cruz de Mármol Premium</a></h4>
+                <p>Arte Funerario</p>
               </div>
             </div>
 
-            <div class="col-lg-4 col-md-6 portfolio-item filter-monumento wow fadeInUp" data-wow-delay="0.1s">
+            <!-- Monumentos -->
+            <div class="portfolio-item filter-monumento">
               <div class="portfolio-wrap">
                 <figure>
-                  <img src="img/portfolio/monumentos/1.jpeg" class="img-fluid" alt="" />
-                  <a href="img/portfolio/monumentos/1.jpeg" class="link-preview" data-lightbox="portfolio" data-title="Monumento de marmol" title="Preview"><i class="ion ion-eye"></i></a>
+                  <img src="img/portfolio/monumentos/1.jpeg" alt="Monumento Conmemorativo" />
+                  <div class="portfolio-category">Monumentos</div>
+                  <div class="portfolio-overlay">
+                    <a href="img/portfolio/monumentos/1.jpeg" class="btn-preview" data-lightbox="portfolio" data-title="Monumento Conmemorativo">
+                      <i class="fa fa-eye"></i> Ver Detalle
+                    </a>
+                  </div>
                 </figure>
-                <div class="portfolio-info">
-                  <h4><a href="#">Monumento de marmol</a></h4>
-                  <p>Monumento de marmol</p>
-                </div>
+              </div>
+              <div class="portfolio-info">
+                <h4><a href="#">Monumento Conmemorativo</a></h4>
+                <p>Granito Negro</p>
               </div>
             </div>
 
-            <div class="col-lg-4 col-md-6 portfolio-item filter-florero wow fadeInUp" data-wow-delay="0.2s">
+            <!-- Floreros -->
+            <div class="portfolio-item filter-florero">
               <div class="portfolio-wrap">
                 <figure>
-                  <img src="img/portfolio/floreros/1.jpeg" class="img-fluid" alt="" />
-                  <a href="img/portfolio/floreros/1.jpeg" class="link-preview" data-lightbox="portfolio" data-title="Florero de marmol" title="Preview"><i class="ion ion-eye"></i></a>
+                  <img src="img/portfolio/floreros/1.jpeg" alt="Florero de Mármol Carrara" />
+                  <div class="portfolio-category">Floreros</div>
+                  <div class="portfolio-overlay">
+                    <a href="img/portfolio/floreros/1.jpeg" class="btn-preview" data-lightbox="portfolio" data-title="Florero de Mármol Carrara">
+                      <i class="fa fa-eye"></i> Ver Detalle
+                    </a>
+                  </div>
                 </figure>
-                <div class="portfolio-info">
-                  <h4><a href="#">Florero de marmol</a></h4>
-                  <p>Florero de marmol</p>
-                </div>
+              </div>
+              <div class="portfolio-info">
+                <h4><a href="#">Florero de Mármol Carrara</a></h4>
+                <p>Mármol Blanco</p>
               </div>
             </div>
 
+            <!-- Proyecto adicional -->
+            <div class="portfolio-item filter-terrazo">
+              <div class="portfolio-wrap">
+                <figure>
+                  <img src="img/intro-carousel/5.png" alt="Piso de Terrazo Comercial" />
+                  <div class="portfolio-category">Terrazo</div>
+                  <div class="portfolio-overlay">
+                    <a href="img/intro-carousel/5.png" class="btn-preview" data-lightbox="portfolio" data-title="Piso de Terrazo Comercial">
+                      <i class="fa fa-eye"></i> Ver Detalle
+                    </a>
+                  </div>
+                </figure>
+              </div>
+              <div class="portfolio-info">
+                <h4><a href="#">Piso de Terrazo Comercial</a></h4>
+                <p>Construcción</p>
+              </div>
+            </div>
+
+            <!-- Monumento adicional -->
+            <div class="portfolio-item filter-monumento">
+              <div class="portfolio-wrap">
+                <figure>
+                  <img src="img/intro-carousel/44.jpeg" alt="Mausoleo Familiar" />
+                  <div class="portfolio-category">Monumentos</div>
+                  <div class="portfolio-overlay">
+                    <a href="img/intro-carousel/44.jpeg" class="btn-preview" data-lightbox="portfolio" data-title="Mausoleo Familiar">
+                      <i class="fa fa-eye"></i> Ver Detalle
+                    </a>
+                  </div>
+                </figure>
+              </div>
+              <div class="portfolio-info">
+                <h4><a href="#">Mausoleo Familiar</a></h4>
+                <p>Granito Premium</p>
+              </div>
+            </div>
+
+            <!-- Cruz adicional -->
+            <div class="portfolio-item filter-cruces">
+              <div class="portfolio-wrap">
+                <figure>
+                  <img src="img/intro-carousel/22.jpeg" alt="Cruz Personalizada" />
+                  <div class="portfolio-category">Cruces</div>
+                  <div class="portfolio-overlay">
+                    <a href="img/intro-carousel/22.jpeg" class="btn-preview" data-lightbox="portfolio" data-title="Cruz Personalizada">
+                      <i class="fa fa-eye"></i> Ver Detalle
+                    </a>
+                  </div>
+                </figure>
+              </div>
+              <div class="portfolio-info">
+                <h4><a href="#">Cruz Personalizada</a></h4>
+                <p>Mármol Grabado</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
