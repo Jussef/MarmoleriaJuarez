@@ -1,211 +1,104 @@
-(function ($) {
-  "use strict";
+// Número de WhatsApp (formato internacional, sin "+" ni espacios)
+const WHATSAPP = "520000000000";
 
-  // Preloader
-  $(window).on('load', function () {
-    if ($('#preloader').length) {
-      $('#preloader').delay(100).fadeOut('slow', function () {
-        $(this).remove();
-      });
-    }
-  });
+const header = document.getElementById("header");
+const nav = document.getElementById("nav");
+const burger = document.getElementById("burger");
+const mobileQuery = window.matchMedia("(max-width: 1080px)");
 
-  // Back to top button
-  $(window).scroll(function() {
-    if ($(this).scrollTop() > 100) {
-      $('.back-to-top').fadeIn('slow');
-    } else {
-      $('.back-to-top').fadeOut('slow');
-    }
-  });
-  $('.back-to-top').click(function(){
-    $('html, body').animate({scrollTop : 0},1500, 'easeInOutExpo');
-    return false;
-  });
+document.getElementById("year").textContent = new Date().getFullYear();
 
-  // Initiate the wowjs animation library
-  new WOW().init();
+// Sombra del header al hacer scroll
+const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 10);
+window.addEventListener("scroll", onScroll, { passive: true });
+onScroll();
 
-  // Initiate superfish on nav menu
-  $('.nav-menu').superfish({
-    animation: {
-      opacity: 'show'
-    },
-    speed: 400
-  });
+// Menú móvil
+function setMenu(open) {
+  nav.classList.toggle("is-open", open);
+  burger.setAttribute("aria-expanded", String(open));
+  burger.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+  document.body.style.overflow = open ? "hidden" : "";
+}
 
-  // Mobile Navigation
-  if ($('#nav-menu-container').length) {
-    var $mobile_nav = $('#nav-menu-container').clone().prop({
-      id: 'mobile-nav'
+burger.addEventListener("click", () => setMenu(!nav.classList.contains("is-open")));
+
+nav.addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (!link) return;
+
+  // En móvil, el primer toque en "Productos"/"Servicios" despliega el submenú
+  const dropItem = link.parentElement.classList.contains("nav__item--drop") ? link.parentElement : null;
+  if (dropItem && mobileQuery.matches) {
+    e.preventDefault();
+    dropItem.classList.toggle("is-open");
+    return;
+  }
+  setMenu(false);
+});
+
+mobileQuery.addEventListener("change", () => setMenu(false));
+
+// Enlace activo según la sección visible
+const navLinks = [...document.querySelectorAll(".nav__link")];
+const sections = navLinks
+  .map((a) => document.querySelector(a.getAttribute("href")))
+  .filter(Boolean);
+
+const sectionObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const id = "#" + entry.target.id;
+      navLinks.forEach((a) => a.classList.toggle("is-active", a.getAttribute("href") === id));
     });
-    $mobile_nav.find('> ul').attr({
-      'class': '',
-      'id': ''
-    });
-    $('body').append($mobile_nav);
-    $('body').prepend('<button type="button" id="mobile-nav-toggle"><i class="fa fa-bars"></i></button>');
-    $('body').append('<div id="mobile-body-overly"></div>');
-    $('#mobile-nav').find('.menu-has-children').prepend('<i class="fa fa-chevron-down"></i>');
+  },
+  { rootMargin: "-45% 0px -50% 0px" }
+);
+sections.forEach((s) => sectionObserver.observe(s));
 
-    $(document).on('click', '.menu-has-children i', function(e) {
-      $(this).next().toggleClass('menu-item-active');
-      $(this).nextAll('ul').eq(0).slideToggle();
-      $(this).toggleClass("fa-chevron-up fa-chevron-down");
+// Aparición al hacer scroll
+const revealObserver = new IntersectionObserver(
+  (entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      obs.unobserve(entry.target);
     });
+  },
+  { threshold: 0.12 }
+);
+document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
 
-    $(document).on('click', '#mobile-nav-toggle', function(e) {
-      $('body').toggleClass('mobile-nav-active');
-      $('#mobile-nav-toggle i').toggleClass('fa-times fa-bars');
-      $('#mobile-body-overly').toggle();
-    });
+// Formulario: arma el mensaje y lo abre en WhatsApp
+const form = document.getElementById("contactForm");
+const formMsg = document.getElementById("formMsg");
 
-    $(document).click(function(e) {
-      var container = $("#mobile-nav, #mobile-nav-toggle");
-      if (!container.is(e.target) && container.has(e.target).length === 0) {
-        if ($('body').hasClass('mobile-nav-active')) {
-          $('body').removeClass('mobile-nav-active');
-          $('#mobile-nav-toggle i').toggleClass('fa-times fa-bars');
-          $('#mobile-body-overly').fadeOut();
-        }
-      }
-    });
-  } else if ($("#mobile-nav, #mobile-nav-toggle").length) {
-    $("#mobile-nav, #mobile-nav-toggle").hide();
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const required = [...form.querySelectorAll("[required]")];
+  required.forEach((f) => f.classList.toggle("is-invalid", !f.value.trim()));
+  const firstInvalid = required.find((f) => !f.value.trim());
+  if (firstInvalid) {
+    formMsg.textContent = "Por favor completa los campos marcados.";
+    firstInvalid.focus();
+    return;
   }
 
-  // Header scroll class
-  $(window).scroll(function () {
-    if ($(this).scrollTop() > 100) {
-      $("#header").addClass("header-scrolled");
-      $("#logo").addClass("logoInicio");
-      $("#cajalogo").addClass("cajalogochica");
-    } else {
-      $("#header").removeClass("header-scrolled");
-      $("#logo").removeClass("logoInicio");
-      $("#cajalogo").removeClass("cajalogochica");
-    }
-  });
+  const data = new FormData(form);
+  const text =
+    `Hola Terramiz, me interesa cotizar un proyecto.\n\n` +
+    `Nombre: ${data.get("nombre")}\n` +
+    `Teléfono: ${data.get("telefono")}\n` +
+    `Interés: ${data.get("servicio")}\n\n` +
+    `${data.get("mensaje")}`;
 
-  if ($(window).scrollTop() > 100) {
-    $('#header').addClass('header-scrolled');
-  }
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+  formMsg.textContent = "¡Gracias! Te estamos redirigiendo a WhatsApp.";
+  form.reset();
+});
 
-  // Smooth scroll for the menu and links with .scrollto classes
-  $('.nav-menu a, #mobile-nav a, .scrollto').on('click', function() {
-    if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
-      var target = $(this.hash);
-      if (target.length) {
-        var top_space = 0;
-
-        if ($('#header').length) {
-          top_space = $('#header').outerHeight();
-
-          if (! $('#header').hasClass('header-scrolled')) {
-            top_space = top_space - 20;
-          }
-        }
-
-        $('html, body').animate({
-          scrollTop: target.offset().top - top_space
-        }, 1500, 'easeInOutExpo');
-
-        if ($(this).parents('.nav-menu').length) {
-          $('.nav-menu .menu-active').removeClass('menu-active');
-          $(this).closest('li').addClass('menu-active');
-        }
-
-        if ($('body').hasClass('mobile-nav-active')) {
-          $('body').removeClass('mobile-nav-active');
-          $('#mobile-nav-toggle i').toggleClass('fa-times fa-bars');
-          $('#mobile-body-overly').fadeOut();
-        }
-        return false;
-      }
-    }
-  });
-
-  // Navigation active state on scroll
-  var nav_sections = $('section');
-  var main_nav = $('.nav-menu, #mobile-nav');
-  var main_nav_height = $('#header').outerHeight();
-
-  $(window).on('scroll', function () {
-    var cur_pos = $(this).scrollTop();
-  
-    nav_sections.each(function() {
-      var top = $(this).offset().top - main_nav_height,
-          bottom = top + $(this).outerHeight();
-  
-      if (cur_pos >= top && cur_pos <= bottom) {
-        main_nav.find('li').removeClass('menu-active menu-item-active');
-        main_nav.find('a[href="#'+$(this).attr('id')+'"]').parent('li').addClass('menu-active menu-item-active');
-      }
-    });
-  });
-
-  // Intro carousel
-  var introCarousel = $(".carousel");
-  var introCarouselIndicators = $(".carousel-indicators");
-  introCarousel.find(".carousel-inner").children(".carousel-item").each(function(index) {
-    (index === 0) ?
-    introCarouselIndicators.append("<li data-target='#introCarousel' data-slide-to='" + index + "' class='active'></li>") :
-    introCarouselIndicators.append("<li data-target='#introCarousel' data-slide-to='" + index + "'></li>");
-
-    $(this).css("background-image", "url('" + $(this).children('.carousel-background').children('img').attr('src') +"')");
-    $(this).children('.carousel-background').remove();
-  });
-
-  $(".carousel").swipe({
-    swipe: function(event, direction, distance, duration, fingerCount, fingerData) {
-      if (direction == 'left') $(this).carousel('next');
-      if (direction == 'right') $(this).carousel('prev');
-    },
-    allowPageScroll:"vertical"
-  });
-
-  // Skills section
-  $('#skills').waypoint(function() {
-    $('.progress .progress-bar').each(function() {
-      $(this).css("width", $(this).attr("aria-valuenow") + '%');
-    });
-  }, { offset: '80%'} );
-
-  // jQuery counterUp (used in Facts section)
-  $('[data-toggle="counter-up"]').counterUp({
-    delay: 10,
-    time: 1000
-  });
-
-  // Porfolio isotope and filter
-  var portfolioIsotope = $('.portfolio-container').isotope({
-    itemSelector: '.portfolio-item',
-    layoutMode: 'fitRows'
-  });
-
-  $('#portfolio-flters li').on( 'click', function() {
-    $("#portfolio-flters li").removeClass('filter-active');
-    $(this).addClass('filter-active');
-
-    portfolioIsotope.isotope({ filter: $(this).data('filter') });
-  });
-
-  // Clients carousel (uses the Owl Carousel library)
-  $(".clients-carousel").owlCarousel({
-    autoplay: true,
-    dots: true,
-    loop: true,
-    responsive: { 0: { items: 2 }, 768: { items: 4 }, 900: { items: 6 }
-    }
-  });
-
-  // Testimonials carousel (uses the Owl Carousel library)
-  $(".testimonials-carousel").owlCarousel({
-    autoplay: true,
-    dots: true,
-    loop: true,
-    items: 1
-  });
-
-})(jQuery);
-
+form.addEventListener("input", (e) => {
+  if (e.target.value.trim()) e.target.classList.remove("is-invalid");
+});
