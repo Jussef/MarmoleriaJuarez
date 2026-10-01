@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/popup.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%23a8844a' d='M20 2l8 8-8 8-8-8z'/%3E%3Cpath fill='%23d8d2c4' d='M10 12l8 8-8 8-8-8z'/%3E%3Cpath fill='%235a5446' d='M30 12l8 8-8 8-8-8z'/%3E%3Cpath fill='%237d8a72' d='M20 22l8 8-8 8-8-8z'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -65,7 +66,7 @@
 
       <div class="header__actions">
         <a href="#contacto" class="btn btn--outline header__cta">Cotiza tu proyecto</a>
-        <a href="https://wa.me/520000000000" class="wa-circle" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+        <a href="https://wa.me/520000000000" data-cms-wa class="wa-circle" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
           <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-whatsapp"/></svg>
         </a>
         <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav">
@@ -77,19 +78,19 @@
 
   <main>
     <!-- ============ HERO ============ -->
-    <section class="hero" id="inicio">
+    <section class="hero" id="inicio" data-cms-bg="hero.img">
       <div class="container hero__content">
         <h1 class="hero__title">
-          Diseños que<br>
-          <span class="gold">perduran</span><br>
-          por generaciones
+          <span data-cms="hero.l1">Diseños que</span><br>
+          <span class="gold" data-cms="hero.gold">perduran</span><br>
+          <span data-cms="hero.l3">por generaciones</span>
         </h1>
         <span class="rule" aria-hidden="true"></span>
-        <p class="hero__text">
+        <p class="hero__text" data-cms="hero.text">
           Marmolería, cubiertas de granito, terrazo y mosaicos artesanales con la más alta
           <strong>calidad</strong> y detalle.
         </p>
-        <a href="#productos" class="btn btn--sage">Conoce nuestros productos <span class="arrow" aria-hidden="true">›</span></a>
+        <a href="#productos" class="btn btn--sage"><span data-cms="hero.btn">Conoce nuestros productos</span> <span class="arrow" aria-hidden="true">›</span></a>
       </div>
     </section>
 
@@ -99,43 +100,43 @@
         <article class="cat">
           <img src="img/iconos/01-marmoleria.png" alt="" width="98" height="66">
           <div>
-            <h3>Marmolería</h3>
-            <p>Fabricación y colocación de mármol, granito y más.</p>
+            <h3 data-cms="cats.1.title">Marmolería</h3>
+            <p data-cms="cats.1.text">Fabricación y colocación de mármol, granito y más.</p>
           </div>
         </article>
         <article class="cat">
           <img src="img/iconos/02-cubiertas-de-granito.png" alt="" width="94" height="66">
           <div>
-            <h3>Cubiertas de granito</h3>
-            <p>Diseños personalizados para cocina, baño y espacios únicos.</p>
+            <h3 data-cms="cats.2.title">Cubiertas de granito</h3>
+            <p data-cms="cats.2.text">Diseños personalizados para cocina, baño y espacios únicos.</p>
           </div>
         </article>
         <article class="cat">
           <img src="img/iconos/03-terrazo-y-pisos.png" alt="" width="73" height="66">
           <div>
-            <h3>Terrazo &amp; pisos</h3>
-            <p>Terrazo, vintage, pisos, loseta y terramiz.</p>
+            <h3 data-cms="cats.3.title">Terrazo &amp; pisos</h3>
+            <p data-cms="cats.3.text">Terrazo, vintage, pisos, loseta y terramiz.</p>
           </div>
         </article>
         <article class="cat">
           <img src="img/iconos/04-lavaderos.png" alt="" width="69" height="66">
           <div>
-            <h3>Lavaderos</h3>
-            <p>Lavaderos de colores y tamaños para cada necesidad.</p>
+            <h3 data-cms="cats.4.title">Lavaderos</h3>
+            <p data-cms="cats.4.text">Lavaderos de colores y tamaños para cada necesidad.</p>
           </div>
         </article>
         <article class="cat">
           <img src="img/iconos/05-mosaicos-de-pasta.png" alt="" width="69" height="66">
           <div>
-            <h3>Mosaicos de pasta</h3>
-            <p>Mosaicos artesanales que aportan arte a tus espacios.</p>
+            <h3 data-cms="cats.5.title">Mosaicos de pasta</h3>
+            <p data-cms="cats.5.text">Mosaicos artesanales que aportan arte a tus espacios.</p>
           </div>
         </article>
         <article class="cat">
           <img src="img/iconos/06-grabados.png" alt="" width="70" height="67">
           <div>
-            <h3>Grabados</h3>
-            <p>Grabamos en granito, mármol, terrazo, azulejo y más.</p>
+            <h3 data-cms="cats.6.title">Grabados</h3>
+            <p data-cms="cats.6.text">Grabamos en granito, mármol, terrazo, azulejo y más.</p>
           </div>
         </article>
       </div>
@@ -145,53 +146,53 @@
     <section class="finishes" id="servicios">
       <div class="container finishes__inner">
         <div class="finishes__intro reveal">
-          <span class="eyebrow">Acabados</span>
-          <h2 class="section-title">Detalles que transforman tus espacios</h2>
-          <p>Cada acabado refleja precisión, experiencia y la belleza natural de los materiales.</p>
+          <span class="eyebrow" data-cms="fin.eyebrow">Acabados</span>
+          <h2 class="section-title" data-cms="fin.title">Detalles que transforman tus espacios</h2>
+          <p data-cms="fin.text">Cada acabado refleja precisión, experiencia y la belleza natural de los materiales.</p>
           <a href="#galeria" class="btn btn--gold">Ver más</a>
         </div>
 
         <div class="finishes__grid">
           <article class="finish reveal">
-            <div class="finish__img"><img src="img/acabados/01-barras-cocina.jpg" alt="Barra de cocina en terrazo con bancos de madera" loading="lazy"></div>
+            <div class="finish__img"><img data-cms-src="fin.1.img" src="img/acabados/01-barras-cocina.jpg" alt="Barra de cocina en terrazo con bancos de madera" loading="lazy"></div>
             <div class="finish__cap">
               <span class="finish__num">1</span>
-              <h3 class="finish__title">Instalación de barras de cocina y cubiertas de baño</h3>
+              <h3 class="finish__title" data-cms="fin.1.title">Instalación de barras de cocina y cubiertas de baño</h3>
             </div>
           </article>
           <article class="finish reveal">
-            <div class="finish__img"><img src="img/acabados/02-pisos-marmol.jpg" alt="Piso de mármol con cenefa oscura" loading="lazy"></div>
+            <div class="finish__img"><img data-cms-src="fin.2.img" src="img/acabados/02-pisos-marmol.jpg" alt="Piso de mármol con cenefa oscura" loading="lazy"></div>
             <div class="finish__cap">
               <span class="finish__num">2</span>
-              <h3 class="finish__title">Colocación de pisos de mármol y grandes formatos</h3>
+              <h3 class="finish__title" data-cms="fin.2.title">Colocación de pisos de mármol y grandes formatos</h3>
             </div>
           </article>
           <article class="finish reveal">
-            <div class="finish__img"><img src="img/acabados/03-vaciado-terrazo.jpg" alt="Vaciado de terrazo en obra" loading="lazy"></div>
+            <div class="finish__img"><img data-cms-src="fin.3.img" src="img/acabados/03-vaciado-terrazo.jpg" alt="Vaciado de terrazo en obra" loading="lazy"></div>
             <div class="finish__cap">
               <span class="finish__num">3</span>
-              <h3 class="finish__title">Aplicación y vaciado de terrazo</h3>
+              <h3 class="finish__title" data-cms="fin.3.title">Aplicación y vaciado de terrazo</h3>
             </div>
           </article>
           <article class="finish reveal">
-            <div class="finish__img"><img src="img/acabados/04-pulido.jpg" alt="Pulidora sobre piso de terrazo" loading="lazy"></div>
+            <div class="finish__img"><img data-cms-src="fin.4.img" src="img/acabados/04-pulido.jpg" alt="Pulidora sobre piso de terrazo" loading="lazy"></div>
             <div class="finish__cap">
               <span class="finish__num">4</span>
-              <h3 class="finish__title">Desbastado, pulido y abrillantado</h3>
+              <h3 class="finish__title" data-cms="fin.4.title">Desbastado, pulido y abrillantado</h3>
             </div>
           </article>
           <article class="finish reveal">
-            <div class="finish__img"><img src="img/acabados/05-banos.jpg" alt="Baño enchapado en mármol blanco" loading="lazy"></div>
+            <div class="finish__img"><img data-cms-src="fin.5.img" src="img/acabados/05-banos.jpg" alt="Baño enchapado en mármol blanco" loading="lazy"></div>
             <div class="finish__cap">
               <span class="finish__num">5</span>
-              <h3 class="finish__title">Enchapado de baños con mármol y azulejo rectificado</h3>
+              <h3 class="finish__title" data-cms="fin.5.title">Enchapado de baños con mármol y azulejo rectificado</h3>
             </div>
           </article>
           <article class="finish reveal">
-            <div class="finish__img"><img src="img/acabados/06-escaleras.jpg" alt="Escalera revestida en piedra con luz indirecta" loading="lazy"></div>
+            <div class="finish__img"><img data-cms-src="fin.6.img" src="img/acabados/06-escaleras.jpg" alt="Escalera revestida en piedra con luz indirecta" loading="lazy"></div>
             <div class="finish__cap">
               <span class="finish__num">6</span>
-              <h3 class="finish__title">Revestimiento de escaleras</h3>
+              <h3 class="finish__title" data-cms="fin.6.title">Revestimiento de escaleras</h3>
             </div>
           </article>
         </div>
@@ -202,40 +203,40 @@
     <section class="products" id="productos">
       <div class="container">
         <header class="section-head reveal">
-          <span class="eyebrow">Productos</span>
-          <h2 class="section-title">Piezas hechas a mano, pensadas para durar</h2>
+          <span class="eyebrow" data-cms="prod.eyebrow">Productos</span>
+          <h2 class="section-title" data-cms="prod.title">Piezas hechas a mano, pensadas para durar</h2>
         </header>
 
         <div class="products__grid" id="galeria">
           <article class="product reveal">
-            <img src="img/productos/terrazo.jpg" alt="Piso de terrazo con piedras de colores" loading="lazy">
+            <img data-cms-src="prod.1.img" src="img/productos/terrazo.jpg" alt="Piso de terrazo con piedras de colores" loading="lazy">
             <div class="product__body">
-              <h3>Terrazo &amp; pisos</h3>
-              <p>Terrazo, vintage, loseta y terramiz para interiores y exteriores.</p>
+              <h3 data-cms="prod.1.title">Terrazo &amp; pisos</h3>
+              <p data-cms="prod.1.text">Terrazo, vintage, loseta y terramiz para interiores y exteriores.</p>
               <a href="#contacto" class="btn btn--line">Ver más</a>
             </div>
           </article>
           <article class="product reveal">
-            <img src="img/productos/lavaderos.jpg" alt="Lavadero de granito verde con llaves de latón" loading="lazy">
+            <img data-cms-src="prod.2.img" src="img/productos/lavaderos.jpg" alt="Lavadero de granito verde con llaves de latón" loading="lazy">
             <div class="product__body">
-              <h3>Lavaderos</h3>
-              <p>Lavaderos de colores y tamaños, hechos para cada necesidad.</p>
+              <h3 data-cms="prod.2.title">Lavaderos</h3>
+              <p data-cms="prod.2.text">Lavaderos de colores y tamaños, hechos para cada necesidad.</p>
               <a href="#contacto" class="btn btn--line">Ver más</a>
             </div>
           </article>
           <article class="product reveal">
-            <img src="img/productos/mosaicos.jpg" alt="Mosaicos de pasta con patrones artesanales" loading="lazy">
+            <img data-cms-src="prod.3.img" src="img/productos/mosaicos.jpg" alt="Mosaicos de pasta con patrones artesanales" loading="lazy">
             <div class="product__body">
-              <h3>Mosaicos de pasta</h3>
-              <p>Artesanales, únicos y llenos de tradición.</p>
+              <h3 data-cms="prod.3.title">Mosaicos de pasta</h3>
+              <p data-cms="prod.3.text">Artesanales, únicos y llenos de tradición.</p>
               <a href="#contacto" class="btn btn--line">Ver más</a>
             </div>
           </article>
           <article class="product reveal">
-            <img src="img/productos/grabados.jpg" alt="Placas grabadas en granito y piedra" loading="lazy">
+            <img data-cms-src="prod.4.img" src="img/productos/grabados.jpg" alt="Placas grabadas en granito y piedra" loading="lazy">
             <div class="product__body">
-              <h3>Grabados</h3>
-              <p>Grabados personalizados en granito, mármol, terrazo y más.</p>
+              <h3 data-cms="prod.4.title">Grabados</h3>
+              <p data-cms="prod.4.text">Grabados personalizados en granito, mármol, terrazo y más.</p>
               <a href="#contacto" class="btn btn--line">Ver más</a>
             </div>
           </article>
@@ -248,12 +249,12 @@
       <div class="container contact__inner">
         <div class="contact__info reveal">
           <span class="eyebrow">Contacto</span>
-          <h2 class="section-title section-title--light">Cotiza tu proyecto</h2>
-          <p>Cuéntanos qué tienes en mente: medidas, material y el espacio. Te respondemos con una propuesta a tu medida.</p>
+          <h2 class="section-title section-title--light" data-cms="contact.title">Cotiza tu proyecto</h2>
+          <p data-cms="contact.text">Cuéntanos qué tienes en mente: medidas, material y el espacio. Te respondemos con una propuesta a tu medida.</p>
           <ul class="contact__list">
-            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-whatsapp"/></svg> <a href="https://wa.me/520000000000" target="_blank" rel="noopener">WhatsApp</a></li>
-            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"/></svg> <a href="mailto:contacto@terramiz.com">contacto@terramiz.com</a></li>
-            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg> Lunes a sábado, 9:00 – 18:00</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-whatsapp"/></svg> <a href="https://wa.me/520000000000" data-cms-wa target="_blank" rel="noopener">WhatsApp</a></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mail"/></svg> <a href="mailto:contacto@terramiz.com" data-cms-mail>contacto@terramiz.com</a></li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg> <span data-cms="contact.hours">Lunes a sábado, 9:00 – 18:00</span></li>
           </ul>
         </div>
 
@@ -311,7 +312,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17l-5.5 2.9 1-6.3L3 9.2l6.2-.9z"/></svg>
         <div><h4>Atención personalizada</h4><p>Estamos para ayudarte</p></div>
       </div>
-      <a href="https://wa.me/520000000000" class="btn btn--gold footer__cta" target="_blank" rel="noopener">
+      <a href="https://wa.me/520000000000" data-cms-wa class="btn btn--gold footer__cta" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-whatsapp"/></svg>
         ¡Hablemos de tu proyecto!
       </a>
@@ -331,6 +332,8 @@
     <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
   </svg>
 
+  <script src="js/store.js"></script>
+  <script src="js/cms.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

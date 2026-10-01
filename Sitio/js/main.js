@@ -1,6 +1,3 @@
-// Número de WhatsApp (formato internacional, sin "+" ni espacios)
-const WHATSAPP = "520000000000";
-
 const header = document.getElementById("header");
 const nav = document.getElementById("nav");
 const burger = document.getElementById("burger");
@@ -87,6 +84,13 @@ form.addEventListener("submit", (e) => {
   }
 
   const data = new FormData(form);
+  TZStore.addMessage({
+    name: data.get("nombre"),
+    phone: data.get("telefono"),
+    interest: data.get("servicio"),
+    message: data.get("mensaje"),
+  });
+
   const text =
     `Hola Terramiz, me interesa cotizar un proyecto.\n\n` +
     `Nombre: ${data.get("nombre")}\n` +
@@ -94,7 +98,8 @@ form.addEventListener("submit", (e) => {
     `Interés: ${data.get("servicio")}\n\n` +
     `${data.get("mensaje")}`;
 
-  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+  const whatsapp = TZStore.get("contact.whatsapp").replace(/\D/g, "");
+  window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
   formMsg.textContent = "¡Gracias! Te estamos redirigiendo a WhatsApp.";
   form.reset();
 });
