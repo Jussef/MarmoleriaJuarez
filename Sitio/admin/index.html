@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Panel · Terramiz</title>
+  <script>
+    // Las rutas del panel son relativas: /admin debe terminar en "/" para que carguen estilos y scripts
+    if (/\/admin$/.test(location.pathname)) location.replace(location.pathname + "/" + location.search + location.hash);
+  </script>
   <meta name="theme-color" content="#1f2922">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
