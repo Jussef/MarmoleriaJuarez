@@ -56,13 +56,10 @@ function tzTrackVisit() {
   TZStore.track("visit");
 }
 
+// 1) Pinta al instante con la copia guardada  2) trae lo más reciente  3) decide el popup
 tzApplyContent();
 tzTrackVisit();
-tzMaybeShowPopup();
-
-// Si el admin está abierto en otra pestaña, los cambios se ven al instante
-window.addEventListener("storage", (e) => {
-  if (e.key !== TZStore.KEY) return;
-  TZStore.reload();
-  tzApplyContent();
-});
+TZStore.load()
+  .then(tzApplyContent)
+  .catch((err) => console.warn(err))
+  .finally(tzMaybeShowPopup);

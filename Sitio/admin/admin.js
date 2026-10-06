@@ -1,5 +1,6 @@
 /* =========================================================
-   TERRAMIZ · Panel de administración (demo MVP)
+   TERRAMIZ · Panel de administración
+   Todo se guarda en la base de datos a través de /api
    ========================================================= */
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -7,9 +8,8 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const esc = TZUtil.escape;
 
 const ROOT = "../"; // el admin vive en /admin, las imágenes en la raíz del sitio
-const imgSrc = (v) => (!v ? "" : v.startsWith("data:") ? v : ROOT + v);
+const imgSrc = (v) => TZUtil.src(v, ROOT);
 const FIELDS = Object.fromEntries(TZ_SCHEMA.flatMap((s) => s.fields).map((f) => [f.k, f]));
-const STORAGE_LIMIT = 5 * 1024 * 1024; // aprox. lo que permite localStorage
 
 /* ---------- Fechas ---------- */
 const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -35,7 +35,6 @@ function timeAgo(iso) {
 }
 const sum = (arr) => arr.reduce((a, b) => a + b, 0);
 const fmtNum = (n) => n.toLocaleString("es-MX");
-const fmtKB = (b) => (b > 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
 
 /* ---------- Toast ---------- */
 let toastTimer;
@@ -46,7 +45,6 @@ function toast(msg, type = "") {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove("is-on"), 2200);
 }
-const saveFailed = () => toast("No hay espacio suficiente. Prueba con una imagen más ligera.", "error");
 
 /* ---------- Imágenes: se reducen y comprimen antes de guardarlas ---------- */
 function compressImage(file, max = 1600, quality = 0.8) {
@@ -71,86 +69,84 @@ function compressImage(file, max = 1600, quality = 0.8) {
   });
 }
 
-/* ---------- Datos de demostración ---------- */
-function seedDemo() {
-  const db = TZStore.raw();
-  if (db.demo) return;
-
-  const visits = { ...db.stats.visits };
-  const demoDays = [];
-  lastDays(60, 1).forEach((k, i) => {
-    if (visits[k]) return;
-    const dow = new Date(k + "T12:00").getDay();
-    visits[k] = Math.max(4, Math.round(22 + 8 * Math.sin(i / 4) + i * 0.25 + (dow === 0 ? -10 : dow === 6 ? -5 : 0) + ((i * 7) % 5)));
-    demoDays.push(k);
-  });
-
-  const demoPopup = { id: "halloween-2026", views: 214, clicks: 37 };
-  const stats = {
-    visits,
-    popupViews: { ...db.stats.popupViews, [demoPopup.id]: (db.stats.popupViews[demoPopup.id] || 0) + demoPopup.views },
-    popupClicks: { ...db.stats.popupClicks, [demoPopup.id]: (db.stats.popupClicks[demoPopup.id] || 0) + demoPopup.clicks },
-  };
-
-  TZStore.replaceAll({ ...db, stats, demo: { days: demoDays, popup: demoPopup } });
-}
-
-function clearDemo() {
-  const db = TZStore.raw();
-  if (!db.demo) return;
-  const visits = { ...db.stats.visits };
-  db.demo.days.forEach((k) => delete visits[k]);
-  const { id, views, clicks } = db.demo.popup;
-  const popupViews = { ...db.stats.popupViews, [id]: Math.max(0, (db.stats.popupViews[id] || 0) - views) };
-  const popupClicks = { ...db.stats.popupClicks, [id]: Math.max(0, (db.stats.popupClicks[id] || 0) - clicks) };
-  TZStore.replaceAll({ ...db, demo: null, demoCleared: true, messages: db.messages.filter((m) => !m.demo), stats: { visits, popupViews, popupClicks } });
-}
-
-/* ---------- Mensajes: viven en la base de datos (/api/mensajes) ---------- */
+/* ---------- Servidor (/api) ---------- */
 const AUTH_KEY = "tz-admin";
 const getToken = () => { try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch { return ""; } };
 const isAuthed = () => !!getToken();
 
 class AuthError extends Error {}
 
-async function api(method, { body, query = "", token = getToken() } = {}) {
-  const res = await fetch(`/api/mensajes${query}`, {
-    method,
-    headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+async function api(method, path, { body, query = "", token = getToken() } = {}) {
+  let res;
+  try {
+    res = await fetch(path + query, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error("No se pudo conectar con el servidor");
+  }
   if (res.status === 401) throw new AuthError("Contraseña incorrecta");
-  if (!res.ok) throw new Error("No se pudo conectar con el servidor");
-  return res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "No se pudo conectar con el servidor");
+  return data;
+}
+
+// Muestra el error; si la sesión ya no es válida, regresa al login
+function apiFailed(err) {
+  if (err instanceof AuthError) return logout();
+  toast(err.message, "error");
+}
+
+// Guarda cambios de textos, imágenes o popups y actualiza la copia local
+async function saveSite(patch) {
+  try {
+    TZStore.replace(await api("PUT", "/api/sitio/", { body: patch }));
+    return true;
+  } catch (err) {
+    apiFailed(err);
+    return false;
+  }
 }
 
 const Inbox = (() => {
   let list = [];
-  let loadedAt = 0;
-  const fail = (err) => {
-    if (err instanceof AuthError) return logout();
-    toast(err.message, "error");
-  };
   return {
     all: () => list,
     async load(token) {
-      list = (await api("GET", { token })).messages;
-      loadedAt = Date.now();
-    },
-    isStale: () => Date.now() - loadedAt > 30000,
-    async refresh() {
-      try { await this.load(); return true; } catch (err) { fail(err); return false; }
+      list = (await api("GET", "/api/mensajes/", { token })).messages;
     },
     async setRead(ids, read) {
       list.forEach((m) => ids.includes(m.id) && (m.read = read));
-      try { await api("PATCH", { body: { ids, read } }); } catch (err) { fail(err); await this.refresh(); }
+      try { await api("PATCH", "/api/mensajes/", { body: { ids, read } }); } catch (err) { apiFailed(err); refreshData(); }
     },
     async remove(id) {
       list = list.filter((m) => m.id !== id);
-      try { await api("DELETE", { query: `?id=${encodeURIComponent(id)}` }); } catch (err) { fail(err); await this.refresh(); }
+      try { await api("DELETE", "/api/mensajes/", { query: `?id=${encodeURIComponent(id)}` }); } catch (err) { apiFailed(err); refreshData(); }
     },
   };
 })();
+
+const Stats = (() => {
+  let data = { visits: {}, popupViews: {}, popupClicks: {} };
+  return {
+    get: () => data,
+    async load(token) {
+      data = await api("GET", "/api/estadisticas/", { token });
+    },
+  };
+})();
+
+// Trae del servidor mensajes, estadísticas y contenido
+let loadedAt = 0;
+async function loadData(token) {
+  await Promise.all([Inbox.load(token), Stats.load(token), TZStore.load()]);
+  loadedAt = Date.now();
+}
+async function refreshData() {
+  try { await loadData(); return true; } catch (err) { apiFailed(err); return false; }
+}
 
 /* ---------- Sesión ---------- */
 function showLogin(note = "") {
@@ -163,7 +159,6 @@ function showLogin(note = "") {
 function showApp() {
   $("#login").hidden = true;
   $("#app").hidden = false;
-  if (!TZStore.raw().demoCleared) seedDemo();
   route();
 }
 
@@ -180,7 +175,7 @@ $("#loginForm").addEventListener("submit", async (e) => {
   btn.disabled = true;
   $("#loginNote").textContent = "Verificando…";
   try {
-    await Inbox.load(token);
+    await loadData(token);
     try { sessionStorage.setItem(AUTH_KEY, token); } catch {}
     $("#loginPassword").value = "";
     if (!location.hash) history.replaceState(null, "", "#resumen");
@@ -212,7 +207,7 @@ const ROUTES = {
   contenido: { title: "Textos e imágenes", sub: "Edita cada sección del sitio. Se guarda automáticamente.", render: viewContenido },
   popups: { title: "Popups y promociones", sub: "Avisos de noticias, descuentos o temporadas", render: viewPopups },
   mensajes: { title: "Mensajes", sub: "Solicitudes enviadas desde el formulario de contacto", render: viewMensajes },
-  ajustes: { title: "Ajustes", sub: "Respaldo de información y datos de la demo", render: viewAjustes },
+  ajustes: { title: "Ajustes", sub: "Respaldo, acceso y mantenimiento", render: viewAjustes },
 };
 
 function route() {
@@ -239,8 +234,8 @@ function route() {
   window.scrollTo(0, 0);
 
   // Trae mensajes nuevos del servidor y vuelve a pintar si seguimos en la misma vista
-  if ((key === "resumen" || key === "mensajes") && Inbox.isStale()) {
-    Inbox.refresh().then((ok) => { if (ok && location.hash.slice(1).split("/")[0] === name && isAuthed()) route(); });
+  if ((key === "resumen" || key === "mensajes") && Date.now() - loadedAt > 30000) {
+    refreshData().then((ok) => { if (ok && location.hash.slice(1).split("/")[0] === name && isAuthed()) route(); });
   }
 }
 window.addEventListener("hashchange", route);
@@ -251,15 +246,6 @@ function updateBadge() {
   b.hidden = !n;
   b.textContent = n;
 }
-
-// Si el sitio (en otra pestaña) registra un mensaje o una visita, refresca
-window.addEventListener("storage", (e) => {
-  if (e.key !== TZStore.KEY) return;
-  TZStore.reload();
-  updateBadge();
-  const name = location.hash.slice(1).split("/")[0];
-  if (["resumen", "mensajes"].includes(name) && isAuthed()) route();
-});
 
 /* =========================================================
    Vista: Resumen
@@ -275,7 +261,7 @@ const ICON = {
 };
 
 function viewResumen(view) {
-  const s = TZStore.stats();
+  const s = Stats.get();
   const msgs = Inbox.all();
   const unread = msgs.filter((m) => !m.read).length;
   const v30 = sum(lastDays(30).map((k) => s.visits[k] || 0));
@@ -289,16 +275,8 @@ function viewResumen(view) {
   const all = Object.values(FIELDS);
   const customTexts = all.filter((f) => f.type !== "image" && TZStore.isCustom(f.k)).length;
   const customImgs = all.filter((f) => f.type === "image" && TZStore.isCustom(f.k)).length;
-  const used = TZStore.usageBytes();
-  const pct = Math.min(100, (used / STORAGE_LIMIT) * 100);
 
   view.innerHTML = `
-    ${TZStore.raw().demo ? `
-      <div class="notice">${ICON.info}
-        <p><strong>Estás viendo datos de demostración.</strong> Las visitas de ejemplo sirven para ver cómo se verá el panel. Los datos reales del sitio se suman a partir de hoy.</p>
-        <a class="btn btn--sm" href="#ajustes">Quitar datos demo</a>
-      </div>` : ""}
-
     <section class="kpis">
       <article class="card kpi">
         <p class="kpi__label">${ICON.eye} Visitas · 30 días</p>
@@ -365,17 +343,17 @@ function viewResumen(view) {
         </div>
       </section>
       <section class="card">
-        <header class="card__head"><h2>Espacio usado</h2><a class="btn btn--sm" href="#ajustes">Respaldo</a></header>
-        <div class="card__body">
-          <div class="meter ${pct > 80 ? "meter--warn" : ""}"><span style="width:${Math.max(pct, 1)}%"></span></div>
-          <p class="meter__meta"><span>${fmtKB(used)} de ~5 MB</span><span>${pct.toFixed(0)}%</span></p>
-          <p class="field__hint" style="margin-top:12px">En la demo todo se guarda en este navegador. Con hosting se conectará a una base de datos.</p>
+        <header class="card__head"><h2>Respaldo</h2><a class="btn btn--sm" href="#ajustes">Ajustes</a></header>
+        <div class="card__body stack">
+          <p class="field__hint">Textos, imágenes, popups, mensajes y visitas se guardan en la base de datos del sitio. Puedes descargar una copia completa cuando quieras.</p>
+          <div><button class="btn btn--sm btn--dark" id="quickBackup">Descargar respaldo</button></div>
         </div>
       </section>
     </div>`;
 
   const data = lastDays(14).map((k) => ({ key: k, value: s.visits[k] || 0 }));
   drawBarChart($("#visitsChart"), data);
+  $("#quickBackup").addEventListener("click", downloadBackup);
 }
 
 /* Gráfica de barras de una sola serie, con tooltip */
@@ -504,22 +482,27 @@ function refreshField(k) {
 const saveTimers = {};
 function saveText(k, value) {
   clearTimeout(saveTimers[k]);
-  saveTimers[k] = setTimeout(() => {
-    const ok = value === TZ_DEFAULTS[k] ? TZStore.resetField(k) : TZStore.set(k, value);
-    if (!ok) return saveFailed();
+  saveTimers[k] = setTimeout(async () => {
+    // Si el texto vuelve a ser el original, se borra la versión editada
+    if (!(await saveSite({ content: { [k]: value === TZ_DEFAULTS[k] ? null : value } }))) return;
     refreshField(k);
     toast("Cambios guardados");
-  }, 450);
+  }, 600);
 }
 
 async function saveImage(k, file) {
+  const drop = $(`[data-drop="${CSS.escape(k)}"]`);
   try {
     const data = await compressImage(file, FIELDS[k].max || 1600);
-    if (!TZStore.set(k, data)) return saveFailed();
+    drop?.classList.add("is-busy");
+    toast("Subiendo imagen…");
+    if (!(await saveSite({ content: { [k]: data } }))) return;
     refreshField(k);
     toast("Imagen actualizada");
   } catch (err) {
     toast(err.message, "error");
+  } finally {
+    drop?.classList.remove("is-busy");
   }
 }
 
@@ -537,10 +520,11 @@ view.addEventListener("change", (e) => {
   if (k && e.target.files[0]) saveImage(k, e.target.files[0]);
   if (k) e.target.value = "";
 });
-view.addEventListener("click", (e) => {
+view.addEventListener("click", async (e) => {
   const k = e.target.closest("[data-reset]")?.dataset.reset;
   if (!k) return;
-  TZStore.resetField(k);
+  clearTimeout(saveTimers[k]);
+  if (!(await saveSite({ content: { [k]: null } }))) return;
   const input = $(`[data-k="${CSS.escape(k)}"]`);
   if (input) input.value = TZStore.get(k);
   refreshField(k);
@@ -674,7 +658,7 @@ function viewPopups(view, arg) {
 
   const list = TZStore.popups();
   const live = TZStore.activePopup();
-  const s = TZStore.stats();
+  const s = Stats.get();
 
   view.innerHTML = `
     <div class="notice">${ICON.info}
@@ -707,7 +691,11 @@ function viewPopups(view, arg) {
     }).join("")}</div>` : `<div class="card empty">No hay popups. <a href="#popups/nuevo">Crea el primero</a>.</div>`}
     ${live ? `<p style="margin-top:16px"><a class="btn btn--sm" href="../?popup=preview" target="_blank" rel="noopener">Probar en el sitio →</a></p>` : ""}`;
 
-  const save = (next, msg) => { if (!TZStore.savePopups(next)) return saveFailed(); toast(msg); viewPopups(view); };
+  const save = async (next, msg) => {
+    if (!(await saveSite({ popups: next }))) return viewPopups(view);
+    toast(msg);
+    viewPopups(view);
+  };
 
   $$("[data-toggle]", view).forEach((c) =>
     c.addEventListener("change", () => {
@@ -839,21 +827,25 @@ function viewPopupEditor(view, arg, draft) {
   $("#popupImgDel")?.addEventListener("click", () => {
     viewPopupEditor(view, arg, { ...read(), image: "" });
   });
-  $("#popupDel")?.addEventListener("click", () => {
+  $("#popupDel")?.addEventListener("click", async () => {
     if (!confirm(`¿Eliminar el popup "${p.title}"?`)) return;
-    TZStore.savePopups(list.filter((x) => x.id !== p.id));
+    if (!(await saveSite({ popups: list.filter((x) => x.id !== p.id) }))) return;
     toast("Popup eliminado");
     location.hash = "#popups";
   });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const d = read();
     if (!d.title.trim()) { form.title.focus(); return toast("Ponle un título al popup", "error"); }
     if (d.start && d.end && d.end < d.start) { form.end.focus(); return toast("La fecha final es antes de la inicial", "error"); }
     d.updatedAt = Date.now();
     const next = isNew ? [d, ...list] : list.map((x) => (x.id === d.id ? d : x));
-    if (!TZStore.savePopups(next)) return saveFailed();
+    const btn = form.querySelector("button[type=submit]");
+    btn.disabled = true;
+    const ok = await saveSite({ popups: next });
+    btn.disabled = false;
+    if (!ok) return;
     toast(isNew ? "Popup creado" : "Cambios guardados");
     location.hash = "#popups";
   });
@@ -937,21 +929,64 @@ function download(name, text, type) {
 /* =========================================================
    Vista: Ajustes
    ========================================================= */
+async function downloadBackup() {
+  try {
+    const data = await api("GET", "/api/admin/");
+    download(`terramiz-respaldo-${TZUtil.today()}.json`, JSON.stringify(data, null, 2), "application/json");
+    toast("Respaldo descargado");
+  } catch (err) {
+    apiFailed(err);
+  }
+}
+
+async function importBackup(data, okMsg) {
+  try {
+    await api("POST", "/api/admin/", { body: { action: "import", data } });
+    await refreshData();
+    toast(okMsg);
+    return true;
+  } catch (err) {
+    apiFailed(err);
+    return false;
+  }
+}
+
+// Lo que se editó en este navegador con la versión anterior del panel (antes de la base de datos)
+const LEGACY_KEY = "terramiz:v1";
+function readLegacy() {
+  try {
+    const db = JSON.parse(localStorage.getItem(LEGACY_KEY));
+    if (!db) return null;
+    const content = db.content || {};
+    const popups = Array.isArray(db.popups) ? db.popups : null;
+    const messages = (db.messages || []).filter((m) => !m.demo);
+    const n = Object.keys(content).length + (popups ? popups.length : 0) + messages.length;
+    return n ? { content, popups, messages, counts: { content: Object.keys(content).length, popups: popups?.length || 0, messages: messages.length } } : null;
+  } catch {
+    return null;
+  }
+}
+
 function viewAjustes(view) {
-  const used = TZStore.usageBytes();
-  const pct = Math.min(100, (used / STORAGE_LIMIT) * 100);
-  const demo = TZStore.raw().demo;
+  const legacy = readLegacy();
 
   view.innerHTML = `
+    ${legacy ? `
+      <div class="notice">${ICON.info}
+        <p><strong>Hay información guardada en este navegador</strong> de la versión anterior del panel:
+          ${legacy.counts.content} textos o imágenes, ${legacy.counts.popups} popups y ${legacy.counts.messages} mensajes.
+          Súbela a la base de datos para que se vea en el sitio.</p>
+        <div class="img-field__actions">
+          <button class="btn btn--sm btn--gold" id="legacyUp">Subir a la base de datos</button>
+          <button class="btn btn--sm btn--ghost" id="legacyDrop">Descartar</button>
+        </div>
+      </div>` : ""}
+
     <div class="grid grid--2">
       <section class="card">
         <header class="card__head"><div><h2>Respaldo</h2><p>Descarga o recupera toda la información del sitio</p></div></header>
         <div class="card__body stack">
-          <div>
-            <div class="meter ${pct > 80 ? "meter--warn" : ""}"><span style="width:${Math.max(pct, 1)}%"></span></div>
-            <p class="meter__meta"><span>${fmtKB(used)} usados de ~5 MB</span><span>${pct.toFixed(0)}%</span></p>
-          </div>
-          <p class="field__hint">Esta demo guarda todo en este navegador. Descarga un respaldo antes de borrar el historial o de cambiar de computadora; al pasar a hosting, este mismo archivo se puede importar a la base de datos.</p>
+          <p class="field__hint">El respaldo incluye textos, imágenes, popups, mensajes y estadísticas. Guárdalo en un lugar seguro; si algo se borra por error, puedes importarlo aquí.</p>
           <div class="img-field__actions">
             <button class="btn btn--dark" id="exportBtn">Descargar respaldo</button>
             <label class="btn" for="importFile">Importar respaldo</label>
@@ -961,28 +996,17 @@ function viewAjustes(view) {
       </section>
 
       <section class="card">
-        <header class="card__head"><div><h2>Datos de demostración</h2><p>Visitas y clics de ejemplo</p></div></header>
-        <div class="card__body stack">
-          <p class="field__hint">${demo
-            ? "Ahora mismo el resumen incluye visitas y clics de ejemplo para mostrar cómo se ve el panel con actividad."
-            : "Los datos de ejemplo están desactivados; sólo ves la actividad real del sitio."}</p>
-          <div>${demo
-            ? '<button class="btn" id="demoOff">Quitar datos de demostración</button>'
-            : '<button class="btn" id="demoOn">Volver a cargar datos de ejemplo</button>'}</div>
-        </div>
-      </section>
-
-      <section class="card">
         <header class="card__head"><div><h2>Acceso</h2><p>Inicio de sesión del panel</p></div></header>
         <div class="card__body stack">
-          <p class="field__hint">El panel pide la contraseña configurada en Vercel (variable <code>ADMIN_PASSWORD</code>). Los mensajes del formulario se guardan en la base de datos.</p>
-          <p class="stat-row"><span>Dirección del panel</span><strong>terramiz.com/admin</strong></p>
+          <p class="field__hint">La contraseña del panel se cambia en Vercel, en la variable <code>ADMIN_PASSWORD</code> (Settings → Environment Variables). Después hay que volver a publicar el sitio.</p>
+          <p class="stat-row"><span>Dirección del panel</span><strong>${esc(location.host)}/admin</strong></p>
         </div>
       </section>
 
       <section class="card">
         <header class="card__head"><div><h2>Restablecer</h2><p>Cuidado: estas acciones no se pueden deshacer</p></div></header>
         <div class="card__body stack">
+          <p class="field__hint">Descarga un respaldo antes de usar estas opciones.</p>
           <div class="img-field__actions">
             <button class="btn btn--danger" id="resetContent">Restaurar textos e imágenes originales</button>
             <button class="btn btn--danger" id="resetAll">Borrar toda la información</button>
@@ -991,44 +1015,53 @@ function viewAjustes(view) {
       </section>
     </div>`;
 
-  $("#exportBtn").addEventListener("click", () => {
-    download(`terramiz-respaldo-${TZUtil.today()}.json`, TZStore.exportJSON(), "application/json");
-    toast("Respaldo descargado");
-  });
+  $("#exportBtn").addEventListener("click", downloadBackup);
   $("#importFile").addEventListener("change", async (e) => {
     const file = e.target.files[0];
+    e.target.value = "";
     if (!file) return;
+    let data;
     try {
-      const text = await file.text();
-      if (!confirm("Esto reemplazará la información actual con la del respaldo. ¿Continuar?")) return;
-      if (!TZStore.importJSON(text)) return saveFailed();
-      toast("Respaldo importado");
-      route();
+      data = JSON.parse(await file.text());
     } catch {
-      toast("El archivo no es un respaldo válido", "error");
+      return toast("El archivo no es un respaldo válido", "error");
     }
+    if (!confirm("Los textos, imágenes y popups del respaldo reemplazarán a los actuales. Los mensajes se agregan sin duplicarse. ¿Continuar?")) return;
+    if (await importBackup(data, "Respaldo importado")) route();
   });
-  $("#demoOff")?.addEventListener("click", () => { clearDemo(); toast("Datos de demostración eliminados"); route(); });
-  $("#demoOn")?.addEventListener("click", () => {
-    TZStore.replaceAll({ ...TZStore.raw(), demoCleared: false });
-    seedDemo();
-    toast("Datos de ejemplo cargados");
+
+  $("#legacyUp")?.addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    const { content, popups, messages } = legacy;
+    if (await importBackup({ content, popups, messages }, "Información subida a la base de datos")) {
+      try { localStorage.removeItem(LEGACY_KEY); } catch {}
+      route();
+    } else e.target.disabled = false;
+  });
+  $("#legacyDrop")?.addEventListener("click", () => {
+    if (!confirm("Se borrará la información guardada en este navegador. Lo que ya está en la base de datos no cambia. ¿Continuar?")) return;
+    try { localStorage.removeItem(LEGACY_KEY); } catch {}
     route();
   });
-  $("#resetContent").addEventListener("click", () => {
-    if (!confirm("Se perderán todos los textos e imágenes que hayas cambiado. ¿Continuar?")) return;
-    TZStore.replaceAll({ ...TZStore.raw(), content: {} });
-    toast("Contenido original restaurado");
-  });
-  $("#resetAll").addEventListener("click", () => {
-    if (!confirm("Se borrarán textos, imágenes, popups, mensajes y estadísticas. ¿Continuar?")) return;
-    TZStore.resetAll();
-    toast("Información borrada");
-    route();
-  });
+
+  const reset = async (action, question, msg) => {
+    if (!confirm(question)) return;
+    try {
+      await api("POST", "/api/admin/", { body: { action } });
+      await refreshData();
+      toast(msg);
+      route();
+    } catch (err) {
+      apiFailed(err);
+    }
+  };
+  $("#resetContent").addEventListener("click", () =>
+    reset("resetContent", "Se perderán todos los textos e imágenes que hayas cambiado. ¿Continuar?", "Contenido original restaurado"));
+  $("#resetAll").addEventListener("click", () =>
+    reset("resetAll", "Se borrarán textos, imágenes, popups, mensajes y estadísticas de la base de datos. ¿Continuar?", "Información borrada"));
 }
 
 /* ---------- Arranque ---------- */
 if (isAuthed()) {
-  Inbox.load().then(showApp, (err) => (err instanceof AuthError ? logout() : (showApp(), toast(err.message, "error"))));
+  loadData().then(showApp, (err) => (err instanceof AuthError ? logout() : (showApp(), toast(err.message, "error"))));
 } else showLogin();

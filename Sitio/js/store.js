@@ -1,10 +1,10 @@
 /* =========================================================
-   TERRAMIZ · Almacén de contenido (demo MVP)
+   TERRAMIZ · Contenido editable del sitio
    ---------------------------------------------------------
-   Sin hosting ni base de datos todavía: todo se guarda en
-   localStorage del navegador. La API (TZStore) está pensada
-   para que después sólo cambie su implementación por
-   llamadas a un backend real, sin tocar el sitio ni el admin.
+   El contenido vive en la base de datos (Vercel Postgres) y
+   se lee con /api/sitio/. El navegador guarda una copia sólo
+   para pintar el sitio al instante mientras llega la versión
+   más reciente.
    ========================================================= */
 
 /* ---------- Esquema de contenido editable ----------
@@ -96,7 +96,7 @@ const TZ_DEFAULTS = Object.fromEntries(
   TZ_SCHEMA.flatMap((s) => s.fields).map((f) => [f.k, f.d])
 );
 
-/* ---------- Popup de ejemplo: Halloween ---------- */
+/* ---------- Popup de fábrica (se usa hasta que se editen los popups en el panel) ---------- */
 const TZ_DEFAULT_POPUPS = [
   {
     id: "halloween-2026",
@@ -133,83 +133,56 @@ const TZUtil = {
   uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   },
+  // Ruta de una imagen: las de la API y las data: son absolutas; las demás son relativas a la raíz del sitio
+  src(v, base = "") {
+    return !v ? "" : /^(data:|\/|https?:)/.test(v) ? v : base + v;
+  },
 };
 
 /* ---------- Almacén ---------- */
 const TZStore = (() => {
-  const KEY = "terramiz:v1";
-  const empty = () => ({ content: {}, popups: null, messages: [], stats: { visits: {}, popupViews: {}, popupClicks: {} } });
+  const CACHE_KEY = "terramiz:cache";
+  let db = { content: {}, popups: null };
 
-  function read() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(KEY));
-      return raw ? { ...empty(), ...raw, stats: { ...empty().stats, ...(raw.stats || {}) } } : empty();
-    } catch {
-      return empty();
-    }
-  }
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (cached) db = { content: cached.content || {}, popups: cached.popups ?? null };
+  } catch {}
 
-  let db = read();
-
-  function write() {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(db));
-      return true;
-    } catch (err) {
-      // Normalmente: se llenó el espacio (~5 MB) por imágenes muy pesadas
-      console.warn("TZStore: no se pudo guardar", err);
-      return false;
-    }
-  }
+  const cache = () => {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(db)); } catch {}
+  };
 
   return {
-    KEY,
-    reload() { db = read(); },
+    // Trae la versión más reciente del servidor
+    async load() {
+      const res = await fetch("/api/sitio/", { cache: "no-store" });
+      if (!res.ok) throw new Error("No se pudo cargar el contenido");
+      this.replace(await res.json());
+    },
+    replace(data) {
+      db = { content: data.content || {}, popups: data.popups ?? null };
+      cache();
+    },
 
     // Contenido
     get: (k) => (k in db.content ? db.content[k] : TZ_DEFAULTS[k]),
     isCustom: (k) => k in db.content,
-    set(k, v) {
-      const prev = db.content[k];
-      db.content[k] = v;
-      if (write()) return true;
-      if (prev === undefined) delete db.content[k]; else db.content[k] = prev;
-      return false;
-    },
-    resetField(k) { delete db.content[k]; return write(); },
 
     // Popups
     popups: () => db.popups ?? structuredClone(TZ_DEFAULT_POPUPS),
-    savePopups(list) { db.popups = list; return write(); },
     activePopup(date = TZUtil.today()) {
       return this.popups().find((p) => p.active && (!p.start || p.start <= date) && (!p.end || date <= p.end)) || null;
     },
 
-    // Mensajes del formulario
-    messages: () => db.messages,
-    addMessage(m) { db.messages.unshift({ id: TZUtil.uid(), date: new Date().toISOString(), read: false, ...m }); return write(); },
-    updateMessage(id, patch) { const m = db.messages.find((x) => x.id === id); if (m) Object.assign(m, patch); return write(); },
-    deleteMessage(id) { db.messages = db.messages.filter((x) => x.id !== id); return write(); },
-
-    // Estadísticas
-    stats: () => db.stats,
+    // Estadísticas (visitas y popups)
     track(type, id) {
-      const day = TZUtil.today();
-      if (type === "visit") db.stats.visits[day] = (db.stats.visits[day] || 0) + 1;
-      else {
-        const bucket = type === "popupView" ? db.stats.popupViews : db.stats.popupClicks;
-        bucket[id] = (bucket[id] || 0) + 1;
-      }
-      write();
+      const body = JSON.stringify({ type, id });
+      try {
+        if (navigator.sendBeacon?.("/api/estadisticas/", new Blob([body], { type: "application/json" }))) return;
+      } catch {}
+      fetch("/api/estadisticas/", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
     },
-
-    // Respaldo / restauración
-    raw: () => db,
-    exportJSON: () => JSON.stringify(db, null, 2),
-    importJSON(json) { const data = JSON.parse(json); db = { ...empty(), ...data }; return write(); },
-    replaceAll(data) { db = { ...empty(), ...data }; return write(); },
-    resetAll() { db = empty(); localStorage.removeItem(KEY); },
-    usageBytes: () => (localStorage.getItem(KEY) || "").length * 2,
   };
 })();
 
@@ -218,7 +191,7 @@ const TZPopup = {
   // base: prefijo para rutas relativas de imagen ("" en el sitio, "../" en el admin)
   html(p, base = "") {
     const e = TZUtil.escape;
-    const img = p.image ? (p.image.startsWith("data:") ? p.image : base + p.image) : "";
+    const img = TZUtil.src(p.image, base);
     const deco = p.theme === "halloween"
       ? `<svg class="tzp__bats" viewBox="0 0 200 60" aria-hidden="true">
            <path d="M20 30c4-6 10-8 14-4 2-4 6-4 7 0 1-4 5-4 7 0 4-4 10-2 14 4-6-2-10 0-12 4-2-3-5-3-7 0-2-3-5-3-7 0-2-4-6-6-16-4z"/>

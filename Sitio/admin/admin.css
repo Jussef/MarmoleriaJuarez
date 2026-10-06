@@ -365,6 +365,7 @@ td.actions { white-space: nowrap; text-align: right; }
 }
 .img-field__preview:hover .img-field__drop,
 .img-field__preview.is-drag .img-field__drop { opacity: 1; }
+.img-field__preview.is-busy { opacity: .55; pointer-events: none; }
 .img-field__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .img-field input[type="file"] { display: none; }
 
