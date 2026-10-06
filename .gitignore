@@ -199,3 +199,5 @@ yarn.lock
 
 # public/librerias/js/fecha.js
 Curso/sco/js/fecha.js
+# Fotos originales de la galería (se optimizan con tools/galeria.py)
+Sitio/img/fotos/

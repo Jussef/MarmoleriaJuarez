@@ -85,13 +85,6 @@ function seedDemo() {
     demoDays.push(k);
   });
 
-  const ago = (h) => new Date(Date.now() - h * 3600000).toISOString();
-  const demoMessages = [
-    { name: "Laura Méndez", phone: "3312345678", interest: "Cubiertas de granito", message: "Hola, quiero cotizar una cubierta de granito para cocina de 3.20 m con barra. ¿Aplica el descuento de Halloween?", date: ago(3), read: false },
-    { name: "Ricardo Salas", phone: "3398765432", interest: "Terrazo & pisos", message: "Me interesa terrazo para 45 m² de sala y comedor, color claro con piedra gris.", date: ago(27), read: false },
-    { name: "Arq. Paola Ruiz", phone: "3355512233", interest: "Mosaicos de pasta", message: "Busco mosaico de pasta para un proyecto de restaurante, aprox. 60 m². ¿Tienen catálogo?", date: ago(70), read: true },
-  ].map((m) => ({ id: TZUtil.uid(), demo: true, ...m }));
-
   const demoPopup = { id: "halloween-2026", views: 214, clicks: 37 };
   const stats = {
     visits,
@@ -99,7 +92,7 @@ function seedDemo() {
     popupClicks: { ...db.stats.popupClicks, [demoPopup.id]: (db.stats.popupClicks[demoPopup.id] || 0) + demoPopup.clicks },
   };
 
-  TZStore.replaceAll({ ...db, stats, messages: [...db.messages, ...demoMessages], demo: { days: demoDays, popup: demoPopup } });
+  TZStore.replaceAll({ ...db, stats, demo: { days: demoDays, popup: demoPopup } });
 }
 
 function clearDemo() {
@@ -113,14 +106,58 @@ function clearDemo() {
   TZStore.replaceAll({ ...db, demo: null, demoCleared: true, messages: db.messages.filter((m) => !m.demo), stats: { visits, popupViews, popupClicks } });
 }
 
-/* ---------- Sesión (demo: sin contraseña) ---------- */
+/* ---------- Mensajes: viven en la base de datos (/api/mensajes) ---------- */
 const AUTH_KEY = "tz-admin";
-const isAuthed = () => { try { return sessionStorage.getItem(AUTH_KEY) === "1"; } catch { return false; } };
+const getToken = () => { try { return sessionStorage.getItem(AUTH_KEY) || ""; } catch { return ""; } };
+const isAuthed = () => !!getToken();
 
-function showLogin() {
+class AuthError extends Error {}
+
+async function api(method, { body, query = "", token = getToken() } = {}) {
+  const res = await fetch(`/api/mensajes${query}`, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (res.status === 401) throw new AuthError("Contraseña incorrecta");
+  if (!res.ok) throw new Error("No se pudo conectar con el servidor");
+  return res.json();
+}
+
+const Inbox = (() => {
+  let list = [];
+  let loadedAt = 0;
+  const fail = (err) => {
+    if (err instanceof AuthError) return logout();
+    toast(err.message, "error");
+  };
+  return {
+    all: () => list,
+    async load(token) {
+      list = (await api("GET", { token })).messages;
+      loadedAt = Date.now();
+    },
+    isStale: () => Date.now() - loadedAt > 30000,
+    async refresh() {
+      try { await this.load(); return true; } catch (err) { fail(err); return false; }
+    },
+    async setRead(ids, read) {
+      list.forEach((m) => ids.includes(m.id) && (m.read = read));
+      try { await api("PATCH", { body: { ids, read } }); } catch (err) { fail(err); await this.refresh(); }
+    },
+    async remove(id) {
+      list = list.filter((m) => m.id !== id);
+      try { await api("DELETE", { query: `?id=${encodeURIComponent(id)}` }); } catch (err) { fail(err); await this.refresh(); }
+    },
+  };
+})();
+
+/* ---------- Sesión ---------- */
+function showLogin(note = "") {
   $("#app").hidden = true;
   $("#login").hidden = false;
-  $("#loginForm button").focus();
+  $("#loginNote").textContent = note;
+  $("#loginPassword").focus();
 }
 
 function showApp() {
@@ -130,19 +167,34 @@ function showApp() {
   route();
 }
 
-$("#loginForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  try { sessionStorage.setItem(AUTH_KEY, "1"); } catch {}
-  if (!location.hash) history.replaceState(null, "", "#resumen");
-  showApp();
-  toast("¡Bienvenido!");
-});
-
-$("#logout").addEventListener("click", () => {
+function logout(note = "Tu sesión terminó, vuelve a entrar.") {
   try { sessionStorage.removeItem(AUTH_KEY); } catch {}
   history.replaceState(null, "", location.pathname);
-  showLogin();
+  showLogin(note);
+}
+
+$("#loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const token = $("#loginPassword").value;
+  const btn = $("#loginForm button");
+  btn.disabled = true;
+  $("#loginNote").textContent = "Verificando…";
+  try {
+    await Inbox.load(token);
+    try { sessionStorage.setItem(AUTH_KEY, token); } catch {}
+    $("#loginPassword").value = "";
+    if (!location.hash) history.replaceState(null, "", "#resumen");
+    showApp();
+    toast("¡Bienvenido!");
+  } catch (err) {
+    $("#loginNote").textContent = err.message;
+    $("#loginPassword").select();
+  } finally {
+    btn.disabled = false;
+  }
 });
+
+$("#logout").addEventListener("click", () => logout(""));
 
 /* ---------- Menú móvil ---------- */
 function setMenu(open) {
@@ -185,11 +237,16 @@ function route() {
   setMenu(false);
   updateBadge();
   window.scrollTo(0, 0);
+
+  // Trae mensajes nuevos del servidor y vuelve a pintar si seguimos en la misma vista
+  if ((key === "resumen" || key === "mensajes") && Inbox.isStale()) {
+    Inbox.refresh().then((ok) => { if (ok && location.hash.slice(1).split("/")[0] === name && isAuthed()) route(); });
+  }
 }
 window.addEventListener("hashchange", route);
 
 function updateBadge() {
-  const n = TZStore.messages().filter((m) => !m.read).length;
+  const n = Inbox.all().filter((m) => !m.read).length;
   const b = $("#unreadBadge");
   b.hidden = !n;
   b.textContent = n;
@@ -219,7 +276,7 @@ const ICON = {
 
 function viewResumen(view) {
   const s = TZStore.stats();
-  const msgs = TZStore.messages();
+  const msgs = Inbox.all();
   const unread = msgs.filter((m) => !m.read).length;
   const v30 = sum(lastDays(30).map((k) => s.visits[k] || 0));
   const vPrev = sum(lastDays(30, 30).map((k) => s.visits[k] || 0));
@@ -238,7 +295,7 @@ function viewResumen(view) {
   view.innerHTML = `
     ${TZStore.raw().demo ? `
       <div class="notice">${ICON.info}
-        <p><strong>Estás viendo datos de demostración.</strong> Las visitas y mensajes de ejemplo sirven para ver cómo se verá el panel. Los datos reales del sitio se suman a partir de hoy.</p>
+        <p><strong>Estás viendo datos de demostración.</strong> Las visitas de ejemplo sirven para ver cómo se verá el panel. Los datos reales del sitio se suman a partir de hoy.</p>
         <a class="btn btn--sm" href="#ajustes">Quitar datos demo</a>
       </div>` : ""}
 
@@ -807,7 +864,7 @@ function viewPopupEditor(view, arg, draft) {
    ========================================================= */
 let msgFilter = "all";
 function viewMensajes(view) {
-  const all = TZStore.messages();
+  const all = Inbox.all();
   const list = msgFilter === "new" ? all.filter((m) => !m.read) : all;
   const unread = all.filter((m) => !m.read).length;
   const waNumber = (phone) => {
@@ -832,7 +889,7 @@ function viewMensajes(view) {
           <tbody>${list.map((m) => `
             <tr class="${m.read ? "" : "is-new"}">
               <td><strong style="font-weight:500">${fmtDate(m.date, { day: "numeric", month: "short" })}</strong><br><span class="field__hint">${timeAgo(m.date)}</span></td>
-              <td>${esc(m.name)}${m.demo ? ' <span class="pill pill--plain">Demo</span>' : ""}<br><span class="field__hint">${esc(m.phone)}</span></td>
+              <td>${esc(m.name)}${m.channel === "whatsapp" ? ' <span class="pill pill--plain">WhatsApp</span>' : ""}<br><span class="field__hint">${esc(m.phone)}</span></td>
               <td><span class="pill pill--plain">${esc(m.interest)}</span></td>
               <td class="msg">${esc(m.message)}</td>
               <td class="actions">
@@ -849,20 +906,20 @@ function viewMensajes(view) {
   $$("[data-filter]", view).forEach((b) => b.addEventListener("click", () => { msgFilter = b.dataset.filter; rerender(); }));
   $$("[data-read]", view).forEach((b) => b.addEventListener("click", () => {
     const m = all.find((x) => x.id === b.dataset.read);
-    TZStore.updateMessage(m.id, { read: !m.read });
+    Inbox.setRead([m.id], !m.read);
     rerender();
   }));
-  $$("[data-mark]", view).forEach((a) => a.addEventListener("click", () => { TZStore.updateMessage(a.dataset.mark, { read: true }); setTimeout(rerender, 100); }));
+  $$("[data-mark]", view).forEach((a) => a.addEventListener("click", () => { Inbox.setRead([a.dataset.mark], true); setTimeout(rerender, 100); }));
   $$("[data-delmsg]", view).forEach((b) => b.addEventListener("click", () => {
     if (!confirm("¿Eliminar este mensaje?")) return;
-    TZStore.deleteMessage(b.dataset.delmsg);
+    Inbox.remove(b.dataset.delmsg);
     toast("Mensaje eliminado");
     rerender();
   }));
-  $("#readAll", view)?.addEventListener("click", () => { all.forEach((m) => TZStore.updateMessage(m.id, { read: true })); rerender(); });
+  $("#readAll", view)?.addEventListener("click", () => { Inbox.setRead(all.filter((m) => !m.read).map((m) => m.id), true); rerender(); });
   $("#csv", view)?.addEventListener("click", () => {
-    const rows = [["Fecha", "Nombre", "Teléfono", "Interés", "Mensaje", "Leído"],
-      ...all.map((m) => [new Date(m.date).toLocaleString("es-MX"), m.name, m.phone, m.interest, m.message, m.read ? "Sí" : "No"])];
+    const rows = [["Fecha", "Nombre", "Teléfono", "Interés", "Mensaje", "Canal", "Leído"],
+      ...all.map((m) => [new Date(m.date).toLocaleString("es-MX"), m.name, m.phone, m.interest, m.message, m.channel === "whatsapp" ? "WhatsApp" : "Formulario", m.read ? "Sí" : "No"])];
     const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     download(`terramiz-mensajes-${TZUtil.today()}.csv`, "﻿" + csv, "text/csv");
   });
@@ -904,10 +961,10 @@ function viewAjustes(view) {
       </section>
 
       <section class="card">
-        <header class="card__head"><div><h2>Datos de demostración</h2><p>Visitas y mensajes de ejemplo</p></div></header>
+        <header class="card__head"><div><h2>Datos de demostración</h2><p>Visitas y clics de ejemplo</p></div></header>
         <div class="card__body stack">
           <p class="field__hint">${demo
-            ? "Ahora mismo el resumen incluye visitas, mensajes y clics de ejemplo para mostrar cómo se ve el panel con actividad."
+            ? "Ahora mismo el resumen incluye visitas y clics de ejemplo para mostrar cómo se ve el panel con actividad."
             : "Los datos de ejemplo están desactivados; sólo ves la actividad real del sitio."}</p>
           <div>${demo
             ? '<button class="btn" id="demoOff">Quitar datos de demostración</button>'
@@ -918,7 +975,7 @@ function viewAjustes(view) {
       <section class="card">
         <header class="card__head"><div><h2>Acceso</h2><p>Inicio de sesión del panel</p></div></header>
         <div class="card__body stack">
-          <p class="field__hint">En la demo el botón “Entrar” no pide contraseña. Cuando el sitio tenga hosting se agregará usuario y contraseña reales.</p>
+          <p class="field__hint">El panel pide la contraseña configurada en Vercel (variable <code>ADMIN_PASSWORD</code>). Los mensajes del formulario se guardan en la base de datos.</p>
           <p class="stat-row"><span>Dirección del panel</span><strong>terramiz.com/admin</strong></p>
         </div>
       </section>
@@ -972,5 +1029,6 @@ function viewAjustes(view) {
 }
 
 /* ---------- Arranque ---------- */
-if (isAuthed()) showApp();
-else showLogin();
+if (isAuthed()) {
+  Inbox.load().then(showApp, (err) => (err instanceof AuthError ? logout() : (showApp(), toast(err.message, "error"))));
+} else showLogin();

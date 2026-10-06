@@ -85,7 +85,7 @@ const TZ_SCHEMA = [
     fields: [
       { k: "contact.title", label: "Título", d: "Cotiza tu proyecto" },
       { k: "contact.text", type: "textarea", label: "Texto", d: "Cuéntanos qué tienes en mente: medidas, material y el espacio. Te respondemos con una propuesta a tu medida." },
-      { k: "contact.whatsapp", label: "Número de WhatsApp", d: "520000000000", hint: "Formato internacional sin + ni espacios. Ej: 5213312345678" },
+      { k: "contact.whatsapp", label: "Número de WhatsApp", d: "525619372355", hint: "Formato internacional sin + ni espacios. Ej: 5213312345678" },
       { k: "contact.email", label: "Correo", d: "contacto@terramiz.com" },
       { k: "contact.hours", label: "Horario", d: "Lunes a sábado, 9:00 – 18:00" },
     ],

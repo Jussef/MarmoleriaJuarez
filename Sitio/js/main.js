@@ -67,29 +67,59 @@ const revealObserver = new IntersectionObserver(
 );
 document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
 
-// Formulario: arma el mensaje y lo abre en WhatsApp
+// Formulario: guarda el mensaje en la base de datos (/api/mensajes)
+// y, si se eligió WhatsApp, además lo abre en WhatsApp
 const form = document.getElementById("contactForm");
 const formMsg = document.getElementById("formMsg");
+const formButtons = [...form.querySelectorAll("button[type=submit]")];
 
-form.addEventListener("submit", (e) => {
+const setFormMsg = (text, isError = false) => {
+  formMsg.textContent = text;
+  formMsg.classList.toggle("is-error", isError);
+};
+
+function saveMessage(data, canal, keepalive = false) {
+  return fetch("/api/mensajes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...Object.fromEntries(data), canal }),
+    keepalive,
+  });
+}
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const required = [...form.querySelectorAll("[required]")];
   required.forEach((f) => f.classList.toggle("is-invalid", !f.value.trim()));
   const firstInvalid = required.find((f) => !f.value.trim());
   if (firstInvalid) {
-    formMsg.textContent = "Por favor completa los campos marcados.";
+    setFormMsg("Por favor completa los campos marcados.", true);
     firstInvalid.focus();
     return;
   }
 
   const data = new FormData(form);
-  TZStore.addMessage({
-    name: data.get("nombre"),
-    phone: data.get("telefono"),
-    interest: data.get("servicio"),
-    message: data.get("mensaje"),
-  });
+  const canal = e.submitter?.value === "whatsapp" ? "whatsapp" : "web";
+
+  if (canal === "web") {
+    formButtons.forEach((b) => (b.disabled = true));
+    setFormMsg("Enviando…");
+    try {
+      const res = await saveMessage(data, canal);
+      if (!res.ok) throw new Error(res.status);
+      setFormMsg("¡Gracias! Recibimos tu mensaje y te contactaremos pronto.");
+      form.reset();
+    } catch {
+      setFormMsg("No se pudo enviar. Intenta de nuevo o escríbenos por WhatsApp.", true);
+    } finally {
+      formButtons.forEach((b) => (b.disabled = false));
+    }
+    return;
+  }
+
+  // WhatsApp: se registra en segundo plano para no bloquear la apertura de la ventana
+  saveMessage(data, canal, true).catch(() => {});
 
   const text =
     `Hola Terramiz, me interesa cotizar un proyecto.\n\n` +

@@ -33,17 +33,14 @@
       <p class="login__sub">Panel de administración</p>
 
       <form class="login__form" id="loginForm">
-        <label class="field">
-          <span>Usuario</span>
-          <input type="text" value="admin@terramiz.com" autocomplete="username" disabled>
-        </label>
+        <input type="text" value="admin" autocomplete="username" hidden>
         <label class="field">
           <span>Contraseña</span>
-          <input type="password" value="demo-demo" autocomplete="current-password" disabled>
+          <input type="password" id="loginPassword" autocomplete="current-password" required autofocus>
         </label>
-        <button class="btn btn--gold btn--block" type="submit" autofocus>Entrar</button>
+        <button class="btn btn--gold btn--block" type="submit">Entrar</button>
       </form>
-      <p class="login__note">Versión demo: el acceso aún no pide contraseña.</p>
+      <p class="login__note" id="loginNote" role="status"></p>
       <a class="login__back" href="../">← Volver al sitio</a>
     </div>
   </section>
