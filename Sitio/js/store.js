@@ -69,7 +69,7 @@ const TZ_SCHEMA = [
       { k: "prod.title", label: "Título", d: "Piezas hechas a mano, pensadas para durar" },
       ...[
         ["img/productos/terrazo.jpg", "Terrazo & pisos", "Terrazo, vintage, loseta y terramiz para interiores y exteriores."],
-        ["img/productos/lavaderos.jpg", "Lavaderos", "Lavaderos de colores y tamaños, hechos para cada necesidad."],
+        ["img/productos/lavaderos.jpg", "Lavabos", "Lavabos de colores y tamaños, hechos para cada necesidad."],
         ["img/productos/mosaicos.jpg", "Mosaicos de pasta", "Artesanales, únicos y llenos de tradición."],
         ["img/productos/grabados.jpg", "Grabados", "Grabados personalizados en granito, mármol, terrazo y más."],
       ].flatMap(([img, t, p], i) => [
